@@ -304,6 +304,75 @@ function getPortfolioCompanyNames(investor) {
   return companies;
 }
 
+// Check if a company name matches any known portfolio company
+function isInPortfolio(companyName, knownCompanies) {
+  const normalized = companyName.toLowerCase().trim();
+  for (const known of knownCompanies) {
+    if (normalized.includes(known) || known.includes(normalized)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Extract company names from text that appear in investment relationship contexts
+function extractInvestmentClaims(text) {
+  const claims = [];
+
+  // Pattern 1: "[investor/person] backed [company]" or "backed [company] to"
+  const backedPattern = /(?:backed|invested in|led investment in|funded)\s+([A-Z][a-zA-Z0-9\.\-]+(?:\s+[A-Z][a-zA-Z0-9\.\-]+)?)/gi;
+
+  // Pattern 2: "[company]'s $X exit" or "$X [company] exit"
+  const exitPattern = /([A-Z][a-zA-Z0-9\.\-]+(?:\s+[A-Z][a-zA-Z0-9\.\-]+)?)'?s?\s+\$[\d,.]+[BMK]?\s*(?:exit|acquisition|IPO)/gi;
+  const exitPattern2 = /\$[\d,.]+[BMK]?\s+([A-Z][a-zA-Z0-9\.\-]+(?:\s+[A-Z][a-zA-Z0-9\.\-]+)?)\s*(?:exit|acquisition|IPO)/gi;
+
+  // Pattern 3: "portfolio company [name]" or "[name] in their portfolio"
+  const portfolioPattern = /portfolio\s+(?:company\s+)?([A-Z][a-zA-Z0-9\.\-]+(?:\s+[A-Z][a-zA-Z0-9\.\-]+)?)/gi;
+
+  let match;
+
+  while ((match = backedPattern.exec(text)) !== null) {
+    claims.push({ type: 'backed', company: match[1].trim(), context: match[0] });
+  }
+
+  while ((match = exitPattern.exec(text)) !== null) {
+    claims.push({ type: 'exit', company: match[1].trim(), context: match[0] });
+  }
+
+  while ((match = exitPattern2.exec(text)) !== null) {
+    claims.push({ type: 'exit', company: match[1].trim(), context: match[0] });
+  }
+
+  while ((match = portfolioPattern.exec(text)) !== null) {
+    claims.push({ type: 'portfolio_mention', company: match[1].trim(), context: match[0] });
+  }
+
+  return claims;
+}
+
+// Extract dollar amount claims (exits, valuations, investments)
+function extractDollarClaims(text) {
+  const claims = [];
+
+  // Pattern: $X [B/M/K] [exit/valuation/investment/acquisition/round]
+  const dollarPattern = /\$[\d,.]+\s*[BMK]?\s*(?:billion|million)?\s*(?:exit|valuation|investment|acquisition|round|IPO|deal)/gi;
+
+  // Pattern: [exit/valuation] of $X
+  const dollarPattern2 = /(?:exit|valuation|investment|acquisition|round)\s+(?:of\s+)?\$[\d,.]+\s*[BMK]?/gi;
+
+  let match;
+
+  while ((match = dollarPattern.exec(text)) !== null) {
+    claims.push({ claim: match[0].trim(), type: 'dollar_claim' });
+  }
+
+  while ((match = dollarPattern2.exec(text)) !== null) {
+    claims.push({ claim: match[0].trim(), type: 'dollar_claim' });
+  }
+
+  return claims;
+}
+
 // Verify portfolio analogies against known portfolio
 function verifyPortfolioAnalogies(analysis, investor) {
   const knownCompanies = getPortfolioCompanyNames(investor);
@@ -312,14 +381,7 @@ function verifyPortfolioAnalogies(analysis, investor) {
 
   for (const analogy of analogies) {
     const companyName = analogy.company?.toLowerCase() || '';
-    // Check if company name matches any known portfolio company
-    let verified = false;
-    for (const known of knownCompanies) {
-      if (companyName.includes(known) || known.includes(companyName)) {
-        verified = true;
-        break;
-      }
-    }
+    const verified = isInPortfolio(companyName, knownCompanies);
     verificationResults.push({
       company: analogy.company,
       verified,
@@ -330,17 +392,92 @@ function verifyPortfolioAnalogies(analysis, investor) {
   return verificationResults;
 }
 
-// Basic claim verification for the analysis
+// Comprehensive claim verification across all analysis fields
 function performBasicVerification(analysis, investor) {
+  const knownCompanies = getPortfolioCompanyNames(investor);
   const portfolioVerification = verifyPortfolioAnalogies(analysis, investor);
   const unverifiedAnalogies = portfolioVerification.filter(v => !v.verified);
 
+  // Collect all text content to scan
+  const textsToScan = [
+    { field: 'executiveSummary', text: analysis.executiveSummary || '' },
+    { field: 'alignmentRationale', text: analysis.alignmentRationale || '' },
+    { field: 'openingHook', text: analysis.pitchRecommendations?.openingHook || '' },
+    { field: 'oneLiner', text: analysis.pitchRecommendations?.oneLiner || '' },
+  ];
+
+  // Add key alignments
+  (analysis.keyAlignments || []).forEach((a, i) => {
+    textsToScan.push({ field: `keyAlignments[${i}].explanation`, text: a.explanation || '' });
+    textsToScan.push({ field: `keyAlignments[${i}].evidence`, text: a.evidence || '' });
+  });
+
+  // Add potential concerns
+  (analysis.potentialConcerns || []).forEach((c, i) => {
+    textsToScan.push({ field: `potentialConcerns[${i}].mitigation`, text: c.mitigation || '' });
+    textsToScan.push({ field: `potentialConcerns[${i}].talkingPoint`, text: c.talkingPoint || '' });
+  });
+
+  // Scan for investment relationship claims
+  const investmentClaimWarnings = [];
+  const dollarClaimWarnings = [];
+
+  for (const { field, text } of textsToScan) {
+    // Check for investment relationship claims
+    const investmentClaims = extractInvestmentClaims(text);
+    for (const claim of investmentClaims) {
+      if (!isInPortfolio(claim.company, knownCompanies)) {
+        investmentClaimWarnings.push({
+          field,
+          type: claim.type,
+          company: claim.company,
+          context: claim.context,
+          severity: 'high',
+          message: `Unverified investment claim: "${claim.context}" - ${claim.company} not found in portfolio`
+        });
+      }
+    }
+
+    // Check for dollar amount claims
+    const dollarClaims = extractDollarClaims(text);
+    for (const claim of dollarClaims) {
+      dollarClaimWarnings.push({
+        field,
+        claim: claim.claim,
+        severity: 'medium',
+        message: `Specific dollar claim may need verification: "${claim.claim}"`
+      });
+    }
+  }
+
+  // Calculate overall status
+  const totalHighSeverity = unverifiedAnalogies.length + investmentClaimWarnings.length;
+  const totalWarnings = dollarClaimWarnings.length;
+
+  let verificationStatus;
+  if (totalHighSeverity === 0 && totalWarnings === 0) {
+    verificationStatus = 'PASSED';
+  } else if (totalHighSeverity === 0 && totalWarnings > 0) {
+    verificationStatus = 'WARNING';
+  } else if (totalHighSeverity <= 1) {
+    verificationStatus = 'WARNING';
+  } else {
+    verificationStatus = 'FLAGGED';
+  }
+
   return {
     portfolioAnalogiesVerified: portfolioVerification,
-    hasUnverifiedClaims: unverifiedAnalogies.length > 0,
-    unverifiedCount: unverifiedAnalogies.length,
-    verificationStatus: unverifiedAnalogies.length === 0 ? 'PASSED' :
-                        unverifiedAnalogies.length <= 1 ? 'WARNING' : 'FLAGGED'
+    investmentClaimWarnings,
+    dollarClaimWarnings,
+    hasUnverifiedClaims: totalHighSeverity > 0,
+    unverifiedCount: totalHighSeverity,
+    warningCount: totalWarnings,
+    verificationStatus,
+    summary: {
+      portfolioAnalogies: { total: portfolioVerification.length, unverified: unverifiedAnalogies.length },
+      investmentClaims: { flagged: investmentClaimWarnings.length },
+      dollarClaims: { flagged: dollarClaimWarnings.length }
+    }
   };
 }
 
