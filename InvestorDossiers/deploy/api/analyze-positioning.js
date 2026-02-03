@@ -283,6 +283,89 @@ function parseInvestorYaml(content) {
   return parseYaml(match[1]);
 }
 
+// Convert a generated profile (from generate-dossier.js) to the investor format used by positioning analysis
+function convertGeneratedProfileToInvestorFormat(profile) {
+  return {
+    name: profile.profile?.name || 'Unknown',
+    firm: profile.profile?.firm || 'Unknown',
+    role: profile.profile?.role || 'Investor',
+    team: profile.profile?.team || '',
+    email: profile.contactLinks?.email || '',
+
+    investment_focus: {
+      areas: profile.investmentFocus?.areas || [],
+      stages: profile.investmentFocus?.stages || [],
+      check_size: {
+        min: profile.investmentFocus?.checkSize?.min || 'N/A',
+        max: profile.investmentFocus?.checkSize?.max || 'N/A'
+      }
+    },
+
+    background: {
+      previous_roles: (profile.background?.careerHighlights || []).map(h => ({
+        company: h.company || '',
+        role: h.role || '',
+        description: h.description || '',
+        source: h.source || null
+      })),
+      education: (profile.background?.education || []).map(e => ({
+        institution: e.institution || '',
+        field: e.field || e.degree || '',
+        source: e.source || null
+      })),
+      notable_traits: (profile.background?.uniqueTraits || []).map(t =>
+        typeof t === 'string' ? t : (t.trait || '')
+      )
+    },
+
+    portfolio: {
+      board_seats: [],
+      board_observer: [],
+      led_investments: (profile.portfolio?.notableInvestments || []).map(i => ({
+        name: i.name || '',
+        description: i.description || '',
+        source: i.source || null
+      })),
+      other_investments: (profile.portfolio?.recentInvestments || []).map(i => ({
+        name: i.name || '',
+        description: i.description || '',
+        source: i.source || null
+      })),
+      historic_portfolio: (profile.portfolio?.historicExits || []).map(e => ({
+        name: e.name || '',
+        description: e.description || '',
+        source: e.source || null
+      }))
+    },
+
+    thesis: {
+      core_philosophy: profile.investmentThesis?.corePhilosophy || '',
+      key_concepts: (profile.investmentThesis?.keyConcepts || []).map(c => ({
+        name: c.name || '',
+        description: c.description || ''
+      })),
+      patterns: (profile.investmentThesis?.patterns || []).map(p =>
+        typeof p === 'string' ? p : (p.pattern || '')
+      ),
+      anti_patterns: (profile.investmentThesis?.antiPatterns || []).map(a =>
+        typeof a === 'string' ? a : (a.antiPattern || '')
+      )
+    },
+
+    engagement: {
+      do: (profile.engagement?.doList || []).map(d =>
+        typeof d === 'string' ? d : (d.tip || '')
+      ),
+      dont: (profile.engagement?.dontList || []).map(d =>
+        typeof d === 'string' ? d : (d.tip || '')
+      ),
+      questions_they_ask: (profile.anticipatedQA || []).map(q => ({
+        question: q.question || ''
+      }))
+    }
+  };
+}
+
 // Extract all portfolio company names from investor data
 function getPortfolioCompanyNames(investor) {
   const companies = new Set();
@@ -670,14 +753,24 @@ export default async function handler(req, res) {
 
     // Get investor dossier
     const slug = briefing.investorSlug;
-    const dossierContent = INVESTOR_DOSSIERS[slug];
-    if (!dossierContent) {
-      return res.status(404).json({
-        error: `Investor dossier not found for: ${slug}`
-      });
-    }
+    let investor;
 
-    const investor = parseInvestorYaml(dossierContent);
+    // First check hardcoded dossiers
+    const dossierContent = INVESTOR_DOSSIERS[slug];
+    if (dossierContent) {
+      investor = parseInvestorYaml(dossierContent);
+    } else {
+      // Try to fetch from KV storage (for dynamically generated dossiers)
+      const storedDossier = await kv.get(`investor-profile:${slug}`);
+      if (storedDossier && storedDossier.profile) {
+        // Convert generated profile format to investor format used by positioning analysis
+        investor = convertGeneratedProfileToInvestorFormat(storedDossier.profile);
+      } else {
+        return res.status(404).json({
+          error: `Investor dossier not found for: ${slug}`
+        });
+      }
+    }
 
     // Build the prompt
     const prompt = buildPrompt(investor, briefing.extractedText, briefing.companyName);
