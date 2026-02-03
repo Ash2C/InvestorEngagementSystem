@@ -6,6 +6,11 @@ A system for creating investor dossiers that help founders prepare for investor 
 
 **New**: The system now includes an AI-powered dossier generator that can create comprehensive investor profiles for any investor by researching publicly available information.
 
+**Multi-Tenant Platform**: The system supports multiple clients with isolated access:
+- **Admin Portal** (`/admin/`) - Password-protected management interface
+- **Client Portal** (`/portal?t={token}`) - Token-based access to assigned dossiers
+- **Client-scoped data** - Positioning analyses are isolated per client
+
 ## Project Structure
 
 ```
@@ -29,20 +34,43 @@ investorengagementsystem/
     └── deploy/                  # Vercel deployment
         ├── index.html           # Production HTML (Yoko Li dossier)
         ├── saurabh-gupta.html   # Saurabh Gupta dossier
-        ├── generate.html        # NEW: Dossier generator form page
-        ├── dossier.html         # NEW: Dynamic dossier viewer
+        ├── generate.html        # Dossier generator form page
+        ├── dossier.html         # Dynamic dossier viewer
+        ├── portal.html          # Client portal - lists assigned dossiers
+        ├── portal-dossier.html  # Client dossier view with token auth
         ├── vercel.json          # Vercel configuration
         ├── package.json         # Dependencies
+        ├── admin/               # Admin portal (password protected)
+        │   ├── index.html       # Admin login page
+        │   ├── dashboard.html   # Admin dashboard
+        │   ├── clients.html     # Client management
+        │   └── dossiers.html    # All dossiers view
         └── api/                 # Serverless API functions
-            ├── upload-briefing.js
-            ├── analyze-positioning.js
-            ├── get-positioning.js
-            ├── delete-briefing.js
+            ├── upload-briefing.js       # Briefing upload (supports clientToken)
+            ├── analyze-positioning.js   # AI positioning analysis (supports clientToken)
+            ├── get-positioning.js       # Get analysis (supports clientToken)
+            ├── delete-briefing.js       # Delete briefing (supports clientToken)
             ├── regenerate-profile.js    # AI profile regeneration
             ├── get-profile.js           # Retrieve stored profiles
             ├── verify-claims.js         # Claim verification
-            ├── generate-dossier.js      # NEW: Generate new dossiers
-            └── list-dossiers.js         # NEW: List all generated dossiers
+            ├── generate-dossier.js      # Generate new dossiers
+            ├── list-dossiers.js         # List all generated dossiers
+            ├── auth/                    # Authentication endpoints
+            │   ├── admin-login.js       # Admin password validation
+            │   ├── admin-logout.js      # Admin session invalidation
+            │   ├── validate-session.js  # Admin session checking
+            │   └── validate-token.js    # Client token validation
+            ├── admin/                   # Admin API endpoints
+            │   └── clients/
+            │       ├── list.js          # List all clients
+            │       ├── create.js        # Create client + token
+            │       ├── get.js           # Get single client
+            │       ├── update.js        # Update client/assignments
+            │       ├── delete.js        # Delete client
+            │       └── regenerate-token.js  # Regenerate client token
+            └── client/                  # Client API endpoints
+                ├── dossiers.js          # Get client's authorized dossiers
+                └── briefing.js          # Client-scoped briefing operations
 ```
 
 ## Design Reference: Yoko Li Dossier
@@ -95,6 +123,19 @@ InvestorDossiers/reference/yoko-li-reference-dossier.html
 - **URL**: https://investor-dossiers.vercel.app/
 - **Platform**: Vercel (serverless)
 - **Storage**: Vercel Blob (files) + Vercel KV (metadata & profiles)
+
+### Environment Variables
+
+```env
+# Required for multi-tenant features
+ADMIN_PASSWORD=your-secure-password    # Admin portal authentication
+
+# Existing (unchanged)
+KV_REST_API_URL=...                    # Vercel KV connection
+KV_REST_API_TOKEN=...                  # Vercel KV authentication
+ANTHROPIC_API_KEY=...                  # Claude API access
+BLOB_READ_WRITE_TOKEN=...              # Vercel Blob access
+```
 
 ---
 
@@ -552,9 +593,99 @@ The Saurabh Gupta dossier (https://investor-dossiers.vercel.app/saurabh-gupta.ht
 
 ---
 
+## Multi-Tenant Platform
+
+### Overview
+
+The platform supports multiple clients with isolated access to investor dossiers:
+
+| Role | Access Method | Details |
+|------|---------------|---------|
+| Admin | Password authentication | `/admin/` - Full management access |
+| Client | Token URLs | `/portal?t=tok_xxx` - Access to assigned dossiers only |
+
+### URL Structure
+
+**Admin Portal:**
+```
+/admin/              → Login page
+/admin/dashboard.html → Dashboard (protected)
+/admin/clients.html   → Manage clients (protected)
+/admin/dossiers.html  → All dossiers (protected)
+```
+
+**Client Portal:**
+```
+/portal?t={token}                      → Client's dossier list
+/portal?t={token}&investor={slug}      → View specific dossier (via portal-dossier.html)
+```
+
+### Data Model (Vercel KV)
+
+**Client Management Keys:**
+```
+client:{clientId}                              → { id, name, token, authorizedDossiers[], isActive, createdAt }
+client-by-token:{token}                        → clientId (fast lookup)
+client-list                                    → [clientId, ...]
+```
+
+**Client-Scoped Briefings (isolated per client):**
+```
+client-briefing:{clientId}:{investorSlug}:{ts} → { briefing data + positioning analysis }
+client-latest-briefing:{clientId}:{slug}       → briefingId reference
+```
+
+**Admin Sessions:**
+```
+admin-session:{sessionId}                      → { createdAt, expiresAt }
+```
+
+**Existing Keys (Unchanged - Shared Data):**
+```
+investor-profile:{slug}                        → Shared investor profile
+generated-dossiers-list                        → Master list of all dossiers
+```
+
+### Token Format
+
+```javascript
+// Format: tok_{22-char-base64url}
+// Example: tok_7Hx9kL2mN5pQ8rT1vW4y
+```
+
+### Admin Experience Flow
+
+```
+1. Admin goes to /admin/ → enters password
+2. Dashboard shows: client count, dossier count, recent activity
+3. Admin clicks "Clients" → sees all clients with their assigned dossiers
+4. Admin clicks "New Client" → enters name, selects dossiers → gets shareable link
+5. Admin clicks "Dossiers" → sees all investor dossiers, can generate new ones
+```
+
+### Client Experience Flow
+
+```
+1. Admin creates client "Acme Corp" → gets token tok_abc123...
+2. Admin assigns dossiers [yoko-li, marc-andreessen] to client
+3. Admin shares link: https://investor-dossiers.vercel.app/portal?t=tok_abc123
+4. Client opens link → sees only Yoko Li and Marc Andreessen dossiers
+5. Client clicks "Yoko Li" → views full dossier
+6. Client uploads briefing → gets personalized positioning analysis
+7. Analysis is stored privately (other clients can't see it)
+```
+
+### Security Notes
+
+- Client tokens in URLs may appear in logs - use HTTPS only
+- Admin sessions expire after 24 hours
+- Client briefings are completely isolated by clientId in KV keys
+- Shared investor profiles contain no client-sensitive data
+
+---
+
 ## Future Enhancements (Not Yet Implemented)
 
-- [ ] User authentication for saved analyses
 - [ ] Comparative analysis across multiple investors
 - [ ] Dossier search functionality
 - [ ] Export to other formats (Word, Slides)
@@ -567,6 +698,33 @@ The Saurabh Gupta dossier (https://investor-dossiers.vercel.app/saurabh-gupta.ht
 ---
 
 ## Changelog
+
+### 2026-02-04: Multi-Tenant Platform
+- Added multi-tenant support with client isolation
+- **Admin Portal** (`/admin/`):
+  - Login page with password authentication
+  - Dashboard with stats overview
+  - Client management (create, edit, delete, regenerate tokens)
+  - All dossiers view
+- **Client Portal** (`/portal?t={token}`):
+  - Token-based authentication (no login required)
+  - Lists only authorized dossiers
+  - Full dossier viewing with positioning analysis
+  - Client-scoped briefing storage
+- **New API Endpoints**:
+  - `/api/auth/*` - Admin login, logout, session validation, token validation
+  - `/api/admin/clients/*` - Client CRUD operations
+  - `/api/client/*` - Client dossier list and briefing operations
+- **Modified Existing APIs**:
+  - `upload-briefing.js` - Added `clientToken` param for client-scoped storage
+  - `analyze-positioning.js` - Added `clientToken` support
+  - `get-positioning.js` - Added `clientToken` support
+  - `delete-briefing.js` - Added `clientToken` support
+- **New KV Data Model**:
+  - `client:{id}` - Client data with authorized dossiers
+  - `client-by-token:{token}` - Fast token lookup
+  - `client-briefing:{clientId}:{slug}:{ts}` - Isolated briefings
+  - `admin-session:{id}` - Admin session tracking
 
 ### 2026-02-04: Stability Fixes & Reference Documentation
 - **API Timeout Increase**: Increased `maxDuration` from 60s to 300s (5 minutes) for all API functions in `vercel.json` to handle comprehensive dossier generation for well-known investors

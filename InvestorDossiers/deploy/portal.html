@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Dossier Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 32px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            color: #1a1a2e;
+        }
+
+        .client-name {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 32px;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-header h2 {
+            font-size: 32px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .dossiers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .dossier-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .dossier-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .dossier-card-header {
+            padding: 24px;
+            background: linear-gradient(135deg, #4a6cf7 0%, #6366f1 100%);
+            color: white;
+        }
+
+        .dossier-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .dossier-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .dossier-role {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .dossier-card-body {
+            padding: 24px;
+        }
+
+        .dossier-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .meta-item {
+            background: #f8f9fc;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .meta-item label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .meta-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .view-dossier {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 20px;
+            background: #f0f4ff;
+            color: #4a6cf7;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .dossier-card:hover .view-dossier {
+            background: #e0e8ff;
+        }
+
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e8ecf4;
+            border-top-color: #4a6cf7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Error State */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .error-icon {
+            width: 64px;
+            height: 64px;
+            background: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .error-icon svg {
+            color: #dc2626;
+            width: 32px;
+            height: 32px;
+        }
+
+        .error-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: #666;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            .dossiers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>Investor Dossier Portal</h1>
+            <span class="client-name" id="clientName"></span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>Your Investor Dossiers</h2>
+            <p>Select an investor to view their complete dossier and positioning analysis</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="loading-container">
+            <div class="spinner"></div>
+            <p class="loading-text">Loading your dossiers...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="error-container" style="display: none;">
+            <div class="error-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="error-title" id="error-title">Access Denied</h3>
+            <p class="error-message" id="error-message">Please check your access link and try again.</p>
+        </div>
+
+        <!-- Dossiers Grid -->
+        <div id="dossiers-container" class="dossiers-grid" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Get token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('t');
+
+        if (!token) {
+            showError('Invalid Access Link', 'No access token provided. Please use the link shared with you.');
+        } else {
+            loadDossiers();
+        }
+
+        async function loadDossiers() {
+            try {
+                const response = await fetch(`/api/client/dossiers?token=${encodeURIComponent(token)}`);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to load dossiers');
+                }
+
+                const data = await response.json();
+
+                // Update client name
+                if (data.client && data.client.name) {
+                    document.getElementById('clientName').textContent = data.client.name;
+                }
+
+                // Hide loading, show content
+                document.getElementById('loading-state').style.display = 'none';
+
+                if (!data.dossiers || data.dossiers.length === 0) {
+                    showEmpty();
+                    return;
+                }
+
+                renderDossiers(data.dossiers);
+
+            } catch (error) {
+                console.error('Load dossiers error:', error);
+                showError('Access Error', error.message);
+            }
+        }
+
+        function renderDossiers(dossiers) {
+            const container = document.getElementById('dossiers-container');
+            container.style.display = 'grid';
+
+            container.innerHTML = dossiers.map(dossier => {
+                const initials = dossier.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                const portalUrl = `/portal-dossier.html?t=${encodeURIComponent(token)}&investor=${encodeURIComponent(dossier.slug)}`;
+
+                return `
+                    <a href="${portalUrl}" class="dossier-card">
+                        <div class="dossier-card-header">
+                            <div class="dossier-avatar">${initials}</div>
+                            <div class="dossier-name">${escapeHtml(dossier.name)}</div>
+                            <div class="dossier-role">${escapeHtml(dossier.role || 'Investor')} at ${escapeHtml(dossier.company)}</div>
+                        </div>
+                        <div class="dossier-card-body">
+                            <div class="dossier-meta">
+                                <div class="meta-item">
+                                    <label>Company</label>
+                                    <div class="value">${escapeHtml(dossier.company)}</div>
+                                </div>
+                                <div class="meta-item">
+                                    <label>Type</label>
+                                    <div class="value">${dossier.isStatic ? 'Curated' : 'AI Generated'}</div>
+                                </div>
+                            </div>
+                            <div class="view-dossier">
+                                View Full Dossier
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        function showError(title, message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'flex';
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-message').textContent = message;
+        }
+
+        function showEmpty() {
+            const container = document.getElementById('dossiers-container');
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>No Dossiers Available</h3>
+                    <p>Your account doesn't have any investor dossiers assigned yet. Please contact your administrator.</p>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -104,6 +104,7 @@ export default async function handler(req, res) {
 
     const companyName = fields.companyName;
     const investorSlug = fields.investorSlug;
+    const clientToken = fields.clientToken; // Optional: for client-scoped storage
 
     if (!file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -168,19 +169,37 @@ export default async function handler(req, res) {
       });
     }
 
+    // If client token provided, validate it and get client ID
+    let clientId = null;
+    if (clientToken) {
+      const tokenClientId = await kv.get(`client-by-token:${clientToken}`);
+      if (tokenClientId) {
+        const client = await kv.get(`client:${tokenClientId}`);
+        if (client && client.isActive) {
+          clientId = tokenClientId;
+        }
+      }
+    }
+
     // Store file in Vercel Blob
-    const blobPath = `briefings/${investorSlug}/${Date.now()}-${file.name}`;
+    const blobPath = clientId
+      ? `briefings/${clientId}/${investorSlug}/${Date.now()}-${file.name}`
+      : `briefings/${investorSlug}/${Date.now()}-${file.name}`;
     const blob = await put(blobPath, file.buffer, {
       access: 'public',
       contentType: file.type,
     });
 
-    // Create briefing ID
-    const briefingId = `briefing:${investorSlug}:${Date.now()}`;
+    // Create briefing ID (scoped to client if token provided)
+    const timestamp = Date.now();
+    const briefingId = clientId
+      ? `client-briefing:${clientId}:${investorSlug}:${timestamp}`
+      : `briefing:${investorSlug}:${timestamp}`;
 
     // Store metadata in KV
     const metadata = {
       id: briefingId,
+      clientId: clientId || null,
       investorSlug,
       companyName,
       filename: file.name,
@@ -194,8 +213,12 @@ export default async function handler(req, res) {
 
     await kv.set(briefingId, metadata);
 
-    // Also store a reference by investor slug for easy lookup
-    await kv.set(`latest-briefing:${investorSlug}`, briefingId);
+    // Also store a reference by investor slug for easy lookup (scoped if client)
+    if (clientId) {
+      await kv.set(`client-latest-briefing:${clientId}:${investorSlug}`, briefingId);
+    } else {
+      await kv.set(`latest-briefing:${investorSlug}`, briefingId);
+    }
 
     return res.status(200).json({
       success: true,
@@ -203,6 +226,8 @@ export default async function handler(req, res) {
       companyName,
       filename: file.name,
       textLength: extractedText.length,
+      extractedText: extractedText.substring(0, 500), // Return preview for client storage
+      blobUrl: blob.url,
     });
 
   } catch (error) {

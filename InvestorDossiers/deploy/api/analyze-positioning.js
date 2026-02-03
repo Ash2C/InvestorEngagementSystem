@@ -724,7 +724,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { briefingId, investorSlug } = req.body;
+    const { briefingId, investorSlug, clientToken } = req.body;
 
     if (!briefingId && !investorSlug) {
       return res.status(400).json({
@@ -732,10 +732,29 @@ export default async function handler(req, res) {
       });
     }
 
+    // If client token provided, validate and get client ID for scoped lookups
+    let clientId = null;
+    if (clientToken) {
+      const tokenClientId = await kv.get(`client-by-token:${clientToken}`);
+      if (tokenClientId) {
+        const client = await kv.get(`client:${tokenClientId}`);
+        if (client && client.isActive) {
+          clientId = tokenClientId;
+        }
+      }
+    }
+
     // Get briefing ID from latest if not provided
     let actualBriefingId = briefingId;
     if (!actualBriefingId && investorSlug) {
-      actualBriefingId = await kv.get(`latest-briefing:${investorSlug}`);
+      // Check client-scoped storage first if we have a client ID
+      if (clientId) {
+        actualBriefingId = await kv.get(`client-latest-briefing:${clientId}:${investorSlug}`);
+      }
+      // Fall back to global storage
+      if (!actualBriefingId) {
+        actualBriefingId = await kv.get(`latest-briefing:${investorSlug}`);
+      }
       if (!actualBriefingId) {
         return res.status(404).json({
           error: 'No briefing found for this investor'

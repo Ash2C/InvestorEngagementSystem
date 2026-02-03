@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Investor Dossier Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .navbar-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .navbar-links a:hover {
+            color: white;
+        }
+
+        .navbar-links a.active {
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h2 {
+            font-size: 28px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #666;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .stat-card .description {
+            font-size: 13px;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 32px;
+        }
+
+        .quick-actions h3 {
+            font-size: 18px;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: #f8f9fc;
+            border: 2px solid #e8ecf4;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .action-btn:hover {
+            border-color: #4a6cf7;
+            background: #f0f4ff;
+        }
+
+        .action-btn .icon {
+            font-size: 24px;
+        }
+
+        .action-btn .text {
+            font-weight: 500;
+        }
+
+        .recent-activity {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .recent-activity h3 {
+            font-size: 18px;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .activity-list li:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .activity-icon.client {
+            background: #e0f2fe;
+        }
+
+        .activity-icon.dossier {
+            background: #dcfce7;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content .title {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .activity-content .time {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Investor Dossier Platform</h1>
+        <div class="navbar-links">
+            <a href="/admin/dashboard.html" class="active">Dashboard</a>
+            <a href="/admin/clients.html">Clients</a>
+            <a href="/admin/dossiers.html">Dossiers</a>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>Dashboard</h2>
+            <p>Overview of your investor dossier platform</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Clients</h3>
+                <div class="value" id="clientCount">-</div>
+                <div class="description">Active client accounts</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Dossiers</h3>
+                <div class="value" id="dossierCount">-</div>
+                <div class="description">Generated investor profiles</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Tokens</h3>
+                <div class="value" id="activeTokens">-</div>
+                <div class="description">Client access tokens in use</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="actions-grid">
+                <a href="/admin/clients.html?action=new" class="action-btn">
+                    <span class="icon">👤</span>
+                    <span class="text">New Client</span>
+                </a>
+                <a href="/generate.html" class="action-btn" target="_blank">
+                    <span class="icon">📄</span>
+                    <span class="text">Generate Dossier</span>
+                </a>
+                <a href="/admin/clients.html" class="action-btn">
+                    <span class="icon">🔗</span>
+                    <span class="text">Manage Access</span>
+                </a>
+                <a href="/admin/dossiers.html" class="action-btn">
+                    <span class="icon">📊</span>
+                    <span class="text">View All Dossiers</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <h3>Recent Clients</h3>
+            <ul class="activity-list" id="recentClients">
+                <li class="loading">Loading...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const sessionId = localStorage.getItem('adminSessionId');
+
+        // Check authentication
+        if (!sessionId) {
+            window.location.href = '/admin/';
+        }
+
+        // Validate session and load data
+        async function init() {
+            try {
+                const validateResponse = await fetch('/api/auth/validate-session', {
+                    headers: { 'Authorization': `Bearer ${sessionId}` }
+                });
+
+                if (!validateResponse.ok) {
+                    localStorage.removeItem('adminSessionId');
+                    window.location.href = '/admin/';
+                    return;
+                }
+
+                // Load stats in parallel
+                loadStats();
+            } catch (error) {
+                console.error('Init error:', error);
+                window.location.href = '/admin/';
+            }
+        }
+
+        async function loadStats() {
+            try {
+                // Fetch clients and dossiers in parallel
+                const [clientsResponse, dossiersResponse] = await Promise.all([
+                    fetch('/api/admin/clients/list', {
+                        headers: { 'Authorization': `Bearer ${sessionId}` }
+                    }),
+                    fetch('/api/list-dossiers')
+                ]);
+
+                if (clientsResponse.ok) {
+                    const clientsData = await clientsResponse.json();
+                    document.getElementById('clientCount').textContent = clientsData.count || 0;
+                    document.getElementById('activeTokens').textContent =
+                        clientsData.clients.filter(c => c.isActive).length || 0;
+
+                    // Show recent clients
+                    renderRecentClients(clientsData.clients);
+                }
+
+                if (dossiersResponse.ok) {
+                    const dossiersData = await dossiersResponse.json();
+                    // Count includes both generated dossiers + 2 static ones (yoko-li, saurabh-gupta)
+                    document.getElementById('dossierCount').textContent =
+                        (dossiersData.count || 0) + 2;
+                }
+            } catch (error) {
+                console.error('Load stats error:', error);
+            }
+        }
+
+        function renderRecentClients(clients) {
+            const list = document.getElementById('recentClients');
+
+            if (!clients || clients.length === 0) {
+                list.innerHTML = '<li class="empty-state">No clients yet. Create your first client to get started.</li>';
+                return;
+            }
+
+            // Show up to 5 most recent clients
+            const recentClients = clients.slice(0, 5);
+
+            list.innerHTML = recentClients.map(client => `
+                <li>
+                    <div class="activity-icon client">👤</div>
+                    <div class="activity-content">
+                        <div class="title">${escapeHtml(client.name)}</div>
+                        <div class="time">${client.authorizedDossiers.length} dossier(s) assigned • Created ${formatDate(client.createdAt)}</div>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffHours < 1) return 'just now';
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/admin-logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${sessionId}` }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+
+            localStorage.removeItem('adminSessionId');
+            localStorage.removeItem('adminSessionExpires');
+            window.location.href = '/admin/';
+        }
+
+        init();
+    </script>
+</body>
+</html>
