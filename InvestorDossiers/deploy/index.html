@@ -929,6 +929,170 @@
             blockquote { padding: 12px 16px; margin: 16px 0; font-size: 0.95rem; }
             ul, ol { padding-left: 20px; }
         }
+
+        /* Source Citation Styles */
+        .source-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            vertical-align: super;
+            margin-left: 2px;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        .source-link svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .source-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 600;
+            border-radius: 50%;
+            margin-left: 4px;
+            vertical-align: super;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .source-indicator:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Sources Section */
+        .sources-section {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .sources-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .source-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .source-number {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .source-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .source-title {
+            font-weight: 500;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .source-url {
+            color: var(--primary);
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 0.85rem;
+        }
+
+        .source-url:hover {
+            text-decoration: underline;
+        }
+
+        .source-domain {
+            color: var(--gray-600);
+            font-size: 0.8rem;
+        }
+
+        .source-used-for {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+        }
+
+        /* Source Coverage Stats */
+        .source-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 12px;
+        }
+
+        .source-stat {
+            text-align: center;
+        }
+
+        .source-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .source-stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            margin-top: 4px;
+        }
+
+        /* AI Generated Profile Container */
+        #ai-generated-profile {
+            display: none;
+        }
+
+        #ai-generated-profile.active {
+            display: block;
+        }
+
+        .ai-profile-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .ai-profile-badge svg {
+            width: 14px;
+            height: 14px;
+        }
     </style>
 </head>
 <body>
@@ -962,7 +1126,7 @@
                     This will use AI to regenerate all investor profile sections including background, portfolio, thesis, and recent activity.
                 </p>
                 <p><strong>This may take 1-2 minutes to complete.</strong></p>
-                <p>The generated content will be checked for hallucinations before being displayed.</p>
+                <p>All claims will include source citations linking to verifiable sources (LinkedIn, Crunchbase, news articles, etc.).</p>
                 <div class="modal-buttons">
                     <button class="btn-secondary" onclick="hideRegenerateModal()">Cancel</button>
                     <button class="btn-primary" id="btn-confirm-regenerate" onclick="regenerateProfile()">
@@ -990,6 +1154,9 @@
             </svg>
             <span id="profile-verification-text"></span>
         </div>
+
+        <!-- AI Generated Profile Container (populated dynamically) -->
+        <div id="ai-generated-profile" class="dossier" style="margin-bottom: 24px;"></div>
 
         <div class="dossier" id="dossier-content">
             <!-- Profile Header -->
@@ -1533,8 +1700,10 @@
     </style>
 
     <script>
-    // Profile Regeneration Feature
+    // Profile Regeneration Feature with Source Citations
     const PROFILE_INVESTOR_SLUG = 'yoko-li';
+    let collectedSources = [];
+    let sourceIndex = 0;
 
     function showRegenerateModal() {
         document.getElementById('regenerate-modal').style.display = 'flex';
@@ -1542,6 +1711,315 @@
 
     function hideRegenerateModal() {
         document.getElementById('regenerate-modal').style.display = 'none';
+    }
+
+    // Create a source citation link
+    function createSourceCitation(source, claimText) {
+        if (!source || source === 'null' || source === null) {
+            return '';
+        }
+
+        sourceIndex++;
+        const currentIndex = sourceIndex;
+
+        // Extract domain from URL
+        let domain = '';
+        try {
+            const url = new URL(source);
+            domain = url.hostname.replace('www.', '');
+        } catch {
+            domain = 'unknown';
+        }
+
+        // Add to collected sources if not already there
+        const existingSource = collectedSources.find(s => s.url === source);
+        if (!existingSource) {
+            collectedSources.push({
+                index: currentIndex,
+                url: source,
+                domain: domain,
+                usedFor: [claimText]
+            });
+        } else {
+            existingSource.usedFor.push(claimText);
+            return `<a href="${escapeHtmlProfile(source)}" target="_blank" class="source-indicator" title="${escapeHtmlProfile(domain)}">${existingSource.index}</a>`;
+        }
+
+        return `<a href="${escapeHtmlProfile(source)}" target="_blank" class="source-indicator" title="${escapeHtmlProfile(domain)}">${currentIndex}</a>`;
+    }
+
+    // Render text with inline source link
+    function renderWithSource(text, source, claimDescription) {
+        const citation = createSourceCitation(source, claimDescription || text);
+        return `${escapeHtmlProfile(text)}${citation}`;
+    }
+
+    // Render the AI-generated profile
+    function renderAIProfile(profile, verification) {
+        // Reset source tracking
+        collectedSources = [];
+        sourceIndex = 0;
+
+        let html = `
+            <div class="ai-profile-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                AI-Generated Profile with Source Citations
+            </div>
+        `;
+
+        // Source Coverage Stats
+        if (verification?.sourceStats) {
+            const stats = verification.sourceStats;
+            html += `
+                <div class="source-stats">
+                    <div class="source-stat">
+                        <div class="source-stat-value">${stats.sourceCoveragePercent || 0}%</div>
+                        <div class="source-stat-label">Source Coverage</div>
+                    </div>
+                    <div class="source-stat">
+                        <div class="source-stat-value">${stats.uniqueSourceCount || 0}</div>
+                        <div class="source-stat-label">Unique Sources</div>
+                    </div>
+                    <div class="source-stat">
+                        <div class="source-stat-value">${stats.claimsWithTrustedSources || 0}</div>
+                        <div class="source-stat-label">Trusted Sources</div>
+                    </div>
+                    <div class="source-stat">
+                        <div class="source-stat-value">${stats.claimsWithoutSources || 0}</div>
+                        <div class="source-stat-label">Missing Sources</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Background Section
+        if (profile.background) {
+            html += `<h2>Background</h2>`;
+            if (profile.background.summary) {
+                html += `<p>${renderWithSource(profile.background.summary, profile.background.summarySource, 'Background summary')}</p>`;
+            }
+
+            // Career Highlights
+            if (profile.background.careerHighlights?.length > 0) {
+                html += `<h3>Career Highlights</h3><ul>`;
+                profile.background.careerHighlights.forEach(item => {
+                    const desc = item.period
+                        ? `<strong>${escapeHtmlProfile(item.company)}</strong>: ${escapeHtmlProfile(item.role)} (${escapeHtmlProfile(item.period)}) — ${escapeHtmlProfile(item.description)}`
+                        : `<strong>${escapeHtmlProfile(item.company)}</strong>: ${escapeHtmlProfile(item.role)} — ${escapeHtmlProfile(item.description)}`;
+                    html += `<li>${desc}${createSourceCitation(item.source, `${item.role} at ${item.company}`)}</li>`;
+                });
+                html += `</ul>`;
+            }
+
+            // Education
+            if (profile.background.education?.length > 0) {
+                html += `<h3>Education</h3><ul>`;
+                profile.background.education.forEach(item => {
+                    const edu = item.year
+                        ? `<strong>${escapeHtmlProfile(item.institution)}</strong>: ${escapeHtmlProfile(item.degree || '')} ${escapeHtmlProfile(item.field || '')} (${escapeHtmlProfile(item.year)})`
+                        : `<strong>${escapeHtmlProfile(item.institution)}</strong>: ${escapeHtmlProfile(item.degree || '')} ${escapeHtmlProfile(item.field || '')}`;
+                    html += `<li>${edu}${createSourceCitation(item.source, `Education at ${item.institution}`)}</li>`;
+                });
+                html += `</ul>`;
+            }
+
+            // Unique Traits
+            if (profile.background.uniqueTraits?.length > 0) {
+                html += `<h3>What Makes Them Unique</h3><ul>`;
+                profile.background.uniqueTraits.forEach(item => {
+                    if (typeof item === 'object' && item.trait) {
+                        html += `<li>${renderWithSource(item.trait, item.source, item.trait)}</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>${escapeHtmlProfile(item)}</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+        }
+
+        // Investment Thesis Section
+        if (profile.investmentThesis) {
+            html += `<h2>Investment Thesis & Key Ideas</h2>`;
+
+            if (profile.investmentThesis.corePhilosophy) {
+                html += `<h3>Core Philosophy</h3>`;
+                html += `<p><em>${renderWithSource(profile.investmentThesis.corePhilosophy, profile.investmentThesis.philosophySource, 'Core philosophy')}</em></p>`;
+            }
+
+            // Key Concepts
+            if (profile.investmentThesis.keyConcepts?.length > 0) {
+                html += `<h3>Key Concepts</h3>`;
+                profile.investmentThesis.keyConcepts.forEach((concept, idx) => {
+                    html += `<h4>${idx + 1}. "${escapeHtmlProfile(concept.name)}"</h4>`;
+                    html += `<p>${renderWithSource(concept.description, concept.source, concept.name)}</p>`;
+                });
+            }
+
+            // Investment Patterns
+            if (profile.investmentThesis.patterns?.length > 0) {
+                html += `<h3>What They Look For</h3><ul>`;
+                profile.investmentThesis.patterns.forEach(item => {
+                    if (typeof item === 'object' && item.pattern) {
+                        html += `<li>${renderWithSource(item.pattern, item.source, item.pattern)}</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>${escapeHtmlProfile(item)}</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+        }
+
+        // Portfolio Section
+        if (profile.portfolio) {
+            html += `<h2>Portfolio</h2>`;
+
+            // Notable Investments
+            if (profile.portfolio.notableInvestments?.length > 0) {
+                html += `<h3>Notable Investments</h3>`;
+                html += `<table><thead><tr><th>Company</th><th>Description</th><th>Stage</th><th>Role</th></tr></thead><tbody>`;
+                profile.portfolio.notableInvestments.forEach(inv => {
+                    html += `<tr>
+                        <td><strong>${escapeHtmlProfile(inv.name)}</strong>${createSourceCitation(inv.source, `Investment in ${inv.name}`)}</td>
+                        <td>${escapeHtmlProfile(inv.description || '')}</td>
+                        <td>${escapeHtmlProfile(inv.stage || '—')}</td>
+                        <td>${escapeHtmlProfile(inv.role || '—')}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+
+            // Recent Investments
+            if (profile.portfolio.recentInvestments?.length > 0) {
+                html += `<h3>Recent Investments</h3>`;
+                html += `<table><thead><tr><th>Company</th><th>Description</th><th>Date</th><th>Details</th></tr></thead><tbody>`;
+                profile.portfolio.recentInvestments.forEach(inv => {
+                    const details = [inv.amount, inv.valuation].filter(Boolean).join(' at ') || '—';
+                    html += `<tr>
+                        <td><strong>${escapeHtmlProfile(inv.name)}</strong>${createSourceCitation(inv.source, `Recent investment in ${inv.name}`)}</td>
+                        <td>${escapeHtmlProfile(inv.description || '')}</td>
+                        <td>${escapeHtmlProfile(inv.date || '—')}</td>
+                        <td>${escapeHtmlProfile(details)}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+
+            // Historic Exits
+            if (profile.portfolio.historicExits?.length > 0) {
+                html += `<h3>Historic Exits</h3>`;
+                html += `<table><thead><tr><th>Company</th><th>Description</th><th>Outcome</th></tr></thead><tbody>`;
+                profile.portfolio.historicExits.forEach(exit => {
+                    const outcome = exit.exitValue ? `${exit.outcome} (${exit.exitValue})` : exit.outcome;
+                    html += `<tr>
+                        <td><strong>${escapeHtmlProfile(exit.name)}</strong>${createSourceCitation(exit.source, `Exit: ${exit.name}`)}</td>
+                        <td>${escapeHtmlProfile(exit.description || '')}</td>
+                        <td>${escapeHtmlProfile(outcome || '—')}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+        }
+
+        // Recent Activity Section
+        if (profile.recentActivity) {
+            html += `<h2>Recent Activity</h2>`;
+
+            // Speaking
+            if (profile.recentActivity.speaking?.length > 0) {
+                html += `<h3>Speaking Engagements</h3>`;
+                html += `<table><thead><tr><th>Event</th><th>Topic</th><th>Date</th></tr></thead><tbody>`;
+                profile.recentActivity.speaking.forEach(item => {
+                    html += `<tr>
+                        <td>${item.source ? `<a href="${escapeHtmlProfile(item.source)}" target="_blank">${escapeHtmlProfile(item.event)}</a>` : escapeHtmlProfile(item.event)}</td>
+                        <td>${escapeHtmlProfile(item.topic || '')}</td>
+                        <td>${escapeHtmlProfile(item.date || '—')}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+
+            // Writing
+            if (profile.recentActivity.writing?.length > 0) {
+                html += `<h3>Writing & Publications</h3><ul>`;
+                profile.recentActivity.writing.forEach(item => {
+                    const title = item.source
+                        ? `<a href="${escapeHtmlProfile(item.source)}" target="_blank">${escapeHtmlProfile(item.title)}</a>`
+                        : escapeHtmlProfile(item.title);
+                    html += `<li><strong>${title}</strong> (${escapeHtmlProfile(item.date || 'Recent')}) — ${escapeHtmlProfile(item.topic || '')}</li>`;
+                });
+                html += `</ul>`;
+            }
+        }
+
+        // Engagement Section
+        if (profile.engagement) {
+            html += `<h2>How to Engage</h2>`;
+
+            if (profile.engagement.doList?.length > 0) {
+                html += `<h3>Do</h3><ul>`;
+                profile.engagement.doList.forEach(item => {
+                    if (typeof item === 'object' && item.tip) {
+                        html += `<li>${renderWithSource(item.tip, item.source, item.tip)}</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>${escapeHtmlProfile(item)}</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+
+            if (profile.engagement.dontList?.length > 0) {
+                html += `<h3>Don't</h3><ul>`;
+                profile.engagement.dontList.forEach(item => {
+                    if (typeof item === 'object' && item.tip) {
+                        html += `<li>${renderWithSource(item.tip, item.source, item.tip)}</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>${escapeHtmlProfile(item)}</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+
+            if (profile.engagement.questionsTheyAsk?.length > 0) {
+                html += `<h3>Questions They Typically Ask</h3><ul>`;
+                profile.engagement.questionsTheyAsk.forEach(item => {
+                    if (typeof item === 'object' && item.question) {
+                        html += `<li>"${renderWithSource(item.question, item.source, item.question)}"</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>"${escapeHtmlProfile(item)}"</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+        }
+
+        // Sources Section
+        if (collectedSources.length > 0) {
+            html += `
+                <div class="sources-section">
+                    <h2>Sources</h2>
+                    <p class="section-intro">All sources used in this AI-generated profile. Click citation numbers above to jump to the source.</p>
+                    <div class="sources-list">
+            `;
+
+            collectedSources.forEach(source => {
+                html += `
+                    <div class="source-item" id="source-${source.index}">
+                        <div class="source-number">${source.index}</div>
+                        <div class="source-details">
+                            <div class="source-domain">${escapeHtmlProfile(source.domain)}</div>
+                            <a href="${escapeHtmlProfile(source.url)}" target="_blank" class="source-url">${escapeHtmlProfile(source.url)}</a>
+                            <div class="source-used-for">Used for: ${source.usedFor.slice(0, 3).map(u => escapeHtmlProfile(u)).join(', ')}${source.usedFor.length > 3 ? ` and ${source.usedFor.length - 3} more` : ''}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+        }
+
+        return html;
     }
 
     async function regenerateProfile() {
@@ -1555,7 +2033,7 @@
 
         // Show loading state
         statusOverlay.style.display = 'flex';
-        statusText.textContent = 'Regenerating investor profile... This may take 1-2 minutes.';
+        statusText.textContent = 'Regenerating investor profile with sources... This may take 1-2 minutes.';
 
         try {
             const response = await fetch('/api/regenerate-profile', {
@@ -1579,56 +2057,60 @@
             const verification = data.verification || {};
 
             if (verification.isValid) {
-                verificationBanner.className = 'profile-verification-banner passed';
+                verificationBanner.className = 'verification-banner passed';
                 verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
-                verificationText.textContent = 'Profile regenerated successfully. All claims verified against known portfolio.';
+                const coverage = verification.sourceStats?.sourceCoveragePercent || 0;
+                verificationText.textContent = `Profile regenerated with ${coverage}% source coverage. ${verification.sourceStats?.uniqueSourceCount || 0} unique sources.`;
             } else if (verification.summary && verification.summary.highSeverity > 0) {
-                verificationBanner.className = 'profile-verification-banner flagged';
+                verificationBanner.className = 'verification-banner flagged';
                 verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
-                verificationText.textContent = `Profile regenerated with ${verification.summary.highSeverity} unverified claim(s). Review the profile for accuracy.`;
+                verificationText.textContent = `Profile regenerated with ${verification.summary.highSeverity} unverified claim(s). Review sources carefully.`;
             } else {
-                verificationBanner.className = 'profile-verification-banner warning';
+                verificationBanner.className = 'verification-banner warning';
                 verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />';
-                verificationText.textContent = `Profile regenerated. ${verification.summary?.mediumSeverity || 0} claim(s) flagged for review.`;
+                const coverage = verification.sourceStats?.sourceCoveragePercent || 0;
+                verificationText.textContent = `Profile regenerated with ${coverage}% source coverage. Some claims may need verification.`;
             }
 
             // Update the last updated date
             const lastUpdated = document.getElementById('last-updated');
             if (lastUpdated && data.generatedAt) {
                 const date = new Date(data.generatedAt);
-                lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+                lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (AI Generated)`;
             }
 
-            // Show verification warnings if any
-            if (verification.warnings && verification.warnings.length > 0) {
-                displayProfileVerificationWarnings(verification.warnings);
-            }
+            // Render the AI-generated profile with sources
+            const aiProfileContainer = document.getElementById('ai-generated-profile');
+            if (aiProfileContainer && data.profile) {
+                aiProfileContainer.innerHTML = renderAIProfile(data.profile, verification);
+                aiProfileContainer.classList.add('active');
 
-            // Reload the page to show new content after a brief delay
-            setTimeout(() => {
-                alert('Profile regenerated successfully! The page will reload to show updated content.');
-                window.location.reload();
-            }, 2000);
+                // Hide the static profile sections
+                const staticSections = document.querySelectorAll('.static-profile-section');
+                staticSections.forEach(section => section.style.display = 'none');
+
+                // Scroll to top to see the new profile
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
 
         } catch (err) {
             console.error('Profile regeneration error:', err);
             statusOverlay.style.display = 'none';
 
             verificationBanner.style.display = 'flex';
-            verificationBanner.className = 'profile-verification-banner flagged';
+            verificationBanner.className = 'verification-banner flagged';
             verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
             verificationText.textContent = `Error: ${err.message || 'Failed to regenerate profile. Please try again.'}`;
         }
     }
 
     function displayProfileVerificationWarnings(warnings) {
-        // Create a warnings container if it doesn't exist
         let warningsContainer = document.getElementById('profile-warnings-container');
         if (!warningsContainer) {
             warningsContainer = document.createElement('div');
             warningsContainer.id = 'profile-warnings-container';
             warningsContainer.className = 'verification-warnings';
-            warningsContainer.style.cssText = 'margin: 16px 0; padding: 16px; background: #fef9c3; border: 1px solid #fde047; border-radius: 8px;';
+            warningsContainer.style.margin = '16px 24px';
             const banner = document.getElementById('profile-verification-banner');
             banner.parentNode.insertBefore(warningsContainer, banner.nextSibling);
         }
@@ -1636,24 +2118,24 @@
         const highSeverity = warnings.filter(w => w.severity === 'high');
         const mediumSeverity = warnings.filter(w => w.severity === 'medium');
 
-        let html = '<h5 style="margin: 0 0 12px; font-size: 0.9rem; color: #854d0e;">⚠️ Profile Verification Warnings</h5>';
+        let html = '<h5>⚠️ Profile Verification Warnings</h5>';
 
         if (highSeverity.length > 0) {
             html += '<div style="margin-bottom: 12px;"><strong>High Severity (Unverified Companies):</strong></div>';
             html += highSeverity.map(w => `
-                <div style="display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; background: white; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; border-left: 3px solid #dc2626;">
-                    <span style="font-weight: 600; color: #374151;">${escapeHtmlProfile(w.field)}:</span>
-                    <span style="color: #4b5563;">${escapeHtmlProfile(w.message)}</span>
+                <div class="verification-warning-item high">
+                    <span class="field">${escapeHtmlProfile(w.field)}:</span>
+                    <span class="message">${escapeHtmlProfile(w.message)}</span>
                 </div>
             `).join('');
         }
 
         if (mediumSeverity.length > 0) {
-            html += '<div style="margin-bottom: 12px; margin-top: 12px;"><strong>Medium Severity (Unverified Amounts):</strong></div>';
+            html += '<div style="margin-bottom: 12px; margin-top: 12px;"><strong>Medium Severity (Missing Sources):</strong></div>';
             html += mediumSeverity.map(w => `
-                <div style="display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; background: white; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; border-left: 3px solid #f59e0b;">
-                    <span style="font-weight: 600; color: #374151;">${escapeHtmlProfile(w.field)}:</span>
-                    <span style="color: #4b5563;">${escapeHtmlProfile(w.message)}</span>
+                <div class="verification-warning-item medium">
+                    <span class="field">${escapeHtmlProfile(w.field)}:</span>
+                    <span class="message">${escapeHtmlProfile(w.message)}</span>
                 </div>
             `).join('');
         }
@@ -1669,27 +2151,49 @@
         return div.innerHTML;
     }
 
-    // Check for stored profile on page load
+    // Check for stored profile on page load and render if exists
     async function checkStoredProfile() {
         try {
             const response = await fetch(`/api/get-profile?investorSlug=${PROFILE_INVESTOR_SLUG}`);
             const data = await response.json();
 
-            if (data.success && data.hasStoredProfile && data.generatedAt) {
+            if (data.success && data.hasStoredProfile && data.profile) {
                 // Update the last updated date
                 const lastUpdated = document.getElementById('last-updated');
-                if (lastUpdated) {
+                if (lastUpdated && data.generatedAt) {
                     const date = new Date(data.generatedAt);
                     lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (AI Generated)`;
                 }
 
-                // Show verification status if available
-                if (data.verification && !data.verification.isValid) {
-                    const verificationBanner = document.getElementById('profile-verification-banner');
-                    const verificationText = document.getElementById('profile-verification-text');
+                // Show verification banner
+                const verificationBanner = document.getElementById('profile-verification-banner');
+                const verificationText = document.getElementById('profile-verification-text');
+                const verificationIcon = document.getElementById('profile-verification-icon');
+
+                if (data.verification) {
                     verificationBanner.style.display = 'flex';
-                    verificationBanner.className = 'profile-verification-banner warning';
-                    verificationText.textContent = 'This profile was AI-generated. Some claims may need verification.';
+                    const coverage = data.verification.sourceStats?.sourceCoveragePercent || 0;
+
+                    if (data.verification.isValid) {
+                        verificationBanner.className = 'verification-banner passed';
+                        verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                        verificationText.textContent = `AI-generated profile with ${coverage}% source coverage.`;
+                    } else {
+                        verificationBanner.className = 'verification-banner warning';
+                        verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />';
+                        verificationText.textContent = `AI-generated profile with ${coverage}% source coverage. Some claims may need verification.`;
+                    }
+                }
+
+                // Render the stored AI profile
+                const aiProfileContainer = document.getElementById('ai-generated-profile');
+                if (aiProfileContainer) {
+                    aiProfileContainer.innerHTML = renderAIProfile(data.profile, data.verification);
+                    aiProfileContainer.classList.add('active');
+
+                    // Hide static profile sections
+                    const staticSections = document.querySelectorAll('.static-profile-section');
+                    staticSections.forEach(section => section.style.display = 'none');
                 }
             }
         } catch (err) {
