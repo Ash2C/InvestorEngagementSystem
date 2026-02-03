@@ -567,17 +567,34 @@ export default async function handler(req, res) {
     const prompt = buildGenerationPrompt(trimmedFirstName, trimmedLastName, trimmedCompany);
 
     // Call Claude API
-    const anthropic = new Anthropic();
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
-    });
+    let message;
+    try {
+      const anthropic = new Anthropic();
+      message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8192,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      });
+    } catch (apiError) {
+      console.error('Anthropic API error:', apiError);
+      return res.status(500).json({
+        error: 'Failed to call AI service',
+        details: apiError.message || 'Unknown API error'
+      });
+    }
+
+    if (!message || !message.content || !message.content[0] || !message.content[0].text) {
+      console.error('Invalid API response structure:', message);
+      return res.status(500).json({
+        error: 'Invalid response from AI service',
+        details: 'Response structure was unexpected'
+      });
+    }
 
     const responseText = message.content[0].text;
 
