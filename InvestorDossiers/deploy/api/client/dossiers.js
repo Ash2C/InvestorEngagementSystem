@@ -35,22 +35,23 @@ async function validateClientToken(token) {
 }
 
 // Static dossier data (for yoko-li and saurabh-gupta)
+// These link directly to the hand-crafted static HTML pages
 const STATIC_DOSSIERS = {
   'yoko-li': {
     slug: 'yoko-li',
     name: 'Yoko Li',
-    company: 'a]a Capital',
-    role: 'General Partner',
+    company: 'Andreessen Horowitz (a16z)',
+    role: 'Partner, AI & Infrastructure',
     isStatic: true,
-    viewUrl: '/portal-dossier.html'
+    staticUrl: '/index.html'  // Yoko Li is the main index page
   },
   'saurabh-gupta': {
     slug: 'saurabh-gupta',
     name: 'Saurabh Gupta',
     company: 'DST Global',
-    role: 'Partner',
+    role: 'Co-Founder & Managing Partner',
     isStatic: true,
-    viewUrl: '/portal-dossier.html'
+    staticUrl: '/saurabh-gupta.html'
   }
 };
 
@@ -90,7 +91,10 @@ export default async function handler(req, res) {
     for (const slug of authorizedSlugs) {
       // Check if it's a static dossier
       if (STATIC_DOSSIERS[slug]) {
-        dossiers.push(STATIC_DOSSIERS[slug]);
+        dossiers.push({
+          ...STATIC_DOSSIERS[slug],
+          viewUrl: null  // Portal will use staticUrl for these
+        });
         continue;
       }
 

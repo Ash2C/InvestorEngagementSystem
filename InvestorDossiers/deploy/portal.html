@@ -359,7 +359,10 @@
 
             container.innerHTML = dossiers.map(dossier => {
                 const initials = dossier.name.split(' ').map(n => n[0]).join('').toUpperCase();
-                const portalUrl = `/portal-dossier.html?t=${encodeURIComponent(token)}&investor=${encodeURIComponent(dossier.slug)}`;
+                // Static dossiers link directly to the full HTML page, generated ones go through portal-dossier
+                const portalUrl = dossier.isStatic && dossier.staticUrl
+                    ? dossier.staticUrl
+                    : `/portal-dossier.html?t=${encodeURIComponent(token)}&investor=${encodeURIComponent(dossier.slug)}`;
 
                 return `
                     <a href="${portalUrl}" class="dossier-card">
