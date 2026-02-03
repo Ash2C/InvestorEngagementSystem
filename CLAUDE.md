@@ -271,9 +271,32 @@ engagement:
 
 ---
 
+---
+
+## Saurabh Gupta Dossier Features
+
+The Saurabh Gupta dossier (https://investor-dossiers.vercel.app/saurabh-gupta.html) includes all the same features as the Yoko Li dossier:
+
+### Profile & Content
+- Profile header with initials avatar (SG), LinkedIn, DST Global, Crunchbase, Signal links
+- Investment focus: Consumer · Enterprise · AI / Series B → Growth / $15M – $200M
+- Background: DST Global co-founder, JPMorgan IB, Phonethics founder, MDI MBA
+- Investment thesis: Founder-friendly terms, category leaders, global arbitrage, concentrated positions
+- Portfolio: Board observer at Brex, Swiggy, Udaan, Rappi; led Airbnb investment
+- Recent AI investments: Safe Superintelligence, Mistral AI, Poolside, Harvey, Anysphere
+- Classic DST portfolio: Facebook, Twitter, WhatsApp, Spotify, Alibaba, Nubank, Klarna
+- Positioning framework, portfolio analogies, anticipated Q&A, meeting prep checklist
+
+### Interactive Features
+- **Company Positioning Analysis Tool** - Same as Yoko Li's (upload briefings, AI-powered analysis)
+- **PDF Export** - Downloads as "Saurabh-Gupta-Investor-Dossier.pdf"
+- **Responsive Design** - Mobile-optimized
+
+---
+
 ## Future Enhancements (Not Yet Implemented)
 
-- [ ] Multiple investor dossier navigation
+- [ ] Multiple investor dossier navigation / index page
 - [ ] User authentication for saved analyses
 - [ ] Comparative analysis across multiple investors
 - [ ] Dossier search functionality

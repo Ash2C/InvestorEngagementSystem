@@ -31,6 +31,40 @@
             padding: 40px 24px;
         }
 
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .last-updated {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-download:hover { background: var(--primary-dark); }
+        .btn-download svg { width: 18px; height: 18px; }
+
         .dossier {
             background: white;
             border-radius: 16px;
@@ -189,19 +223,472 @@
             a { color: var(--primary); text-decoration: underline; }
             h2 { page-break-after: avoid; }
             table, blockquote { page-break-inside: avoid; }
+            #positioning-upload, #positioning-analyzing, #positioning-error { display: none !important; }
+            .results-header { page-break-after: avoid; }
+            .score-card { page-break-inside: avoid; }
+            .result-section { page-break-inside: avoid; }
+            .alignment-card, .concern-card, .question-card, .analogy-card {
+                page-break-inside: avoid;
+                overflow: visible !important;
+            }
+            .language-grid { page-break-inside: avoid; }
+            .results-actions { display: none !important; }
+            #positioning-results { overflow: visible !important; }
+        }
+
+        /* PDF generation specific overrides */
+        .pdf-rendering,
+        .pdf-rendering * {
+            overflow: visible !important;
+            max-height: none !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .pdf-rendering .positioning-state,
+        .pdf-rendering .result-section,
+        .pdf-rendering .alignment-card,
+        .pdf-rendering .concern-card,
+        .pdf-rendering .question-card,
+        .pdf-rendering .analogy-card,
+        .pdf-rendering .score-card,
+        .pdf-rendering .language-grid,
+        .pdf-rendering #positioning-results {
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
+        }
+
+        .pdf-rendering .score-card {
+            background: #f0f9ff !important;
+            box-shadow: none !important;
+        }
+
+        .pdf-rendering .score-circle {
+            box-shadow: none !important;
+            border: 2px solid var(--primary) !important;
+            background: white !important;
+        }
+
+        .pdf-rendering .dossier {
+            box-shadow: none !important;
+        }
+
+        .pdf-rendering .alignment-card,
+        .pdf-rendering .concern-card,
+        .pdf-rendering .question-card,
+        .pdf-rendering .analogy-card {
+            box-shadow: none !important;
+            border: 1px solid #e5e7eb !important;
+            background: #f9fafb !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            margin-bottom: 16px !important;
+        }
+
+        .pdf-rendering .result-section {
+            break-inside: auto !important;
+            page-break-inside: auto !important;
+            margin-bottom: 24px !important;
+            padding-bottom: 20px !important;
+        }
+
+        .pdf-rendering .result-section h4 {
+            break-after: avoid !important;
+            page-break-after: avoid !important;
+            margin-top: 16px !important;
+        }
+
+        .pdf-rendering h2 {
+            break-before: auto !important;
+            break-after: avoid !important;
+            page-break-after: avoid !important;
+        }
+
+        .pdf-rendering h3,
+        .pdf-rendering h4,
+        .pdf-rendering h5 {
+            break-after: avoid !important;
+            page-break-after: avoid !important;
+        }
+
+        .pdf-rendering .tag-use,
+        .pdf-rendering .tag-avoid {
+            display: inline-block !important;
+            margin-bottom: 4px !important;
+        }
+
+        .pdf-rendering .language-grid {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .pdf-rendering .mitigation,
+        .pdf-rendering .response {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .pdf-rendering blockquote {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .pdf-rendering #positioning-container {
+            break-before: always !important;
+            page-break-before: always !important;
+        }
+
+        /* Positioning Section Styles */
+        .positioning-state { margin-top: 24px; }
+
+        .upload-zone {
+            border: 2px dashed var(--gray-200);
+            border-radius: 12px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--gray-50);
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .upload-icon { color: var(--gray-600); margin-bottom: 16px; }
+        .upload-text { font-size: 1.1rem; font-weight: 500; color: var(--gray-800); margin-bottom: 4px; }
+        .upload-subtext { font-size: 0.9rem; color: var(--gray-600); }
+
+        .upload-form { margin-top: 20px; }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .file-preview svg { color: var(--primary); flex-shrink: 0; }
+        .file-preview span { flex: 1; font-weight: 500; }
+
+        .btn-remove {
+            background: none;
+            border: none;
+            color: var(--gray-600);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+        }
+        .btn-remove:hover { color: #dc2626; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.9rem; }
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.15s;
+        }
+        .form-group input:focus { outline: none; border-color: var(--primary); }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled { background: var(--gray-200); cursor: not-allowed; }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            color: var(--gray-800);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-secondary:hover { background: var(--gray-50); border-color: var(--gray-300); }
+
+        .btn-upload { width: 100%; justify-content: center; }
+
+        /* Analyzing State */
+        .analyzing-container {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .analyzing-text { font-size: 1.1rem; font-weight: 500; color: var(--gray-800); margin-bottom: 8px; }
+        .analyzing-subtext { font-size: 0.9rem; color: var(--gray-600); }
+
+        /* Results State */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .results-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .company-badge, .file-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .company-badge { background: #dbeafe; color: #1e40af; }
+        .file-badge { background: var(--gray-100); color: var(--gray-600); }
+
+        .results-actions { display: flex; gap: 8px; }
+
+        .score-card {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 24px;
+            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .score-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .score-info h4 { margin: 0 0 8px; font-size: 1rem; }
+        .score-info p { margin: 0; color: var(--gray-600); font-size: 0.95rem; }
+
+        .result-section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .result-section:last-child { border-bottom: none; }
+
+        .result-section h4 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--gray-900);
+        }
+
+        .result-section h5 {
+            margin: 16px 0 8px;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+        }
+
+        .alignment-card, .concern-card, .question-card, .analogy-card {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .alignment-card h5, .concern-card h5, .question-card h5, .analogy-card h5 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+            color: var(--gray-900);
+        }
+
+        .alignment-card p, .concern-card p, .question-card p, .analogy-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--gray-700);
+        }
+
+        .alignment-card .evidence {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--gray-200);
+            font-style: italic;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .concern-card .mitigation {
+            margin-top: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #22c55e;
+        }
+
+        .concern-card .mitigation-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #22c55e;
+            margin-bottom: 4px;
+        }
+
+        .question-card .response {
+            margin-top: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .question-card .response-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .label-use { color: #22c55e; }
+        .label-avoid { color: #dc2626; }
+
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .tag-use {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .tag-avoid {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        /* Error State */
+        .error-container {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .error-container svg { color: #dc2626; margin-bottom: 16px; }
+        .error-text { font-size: 1.1rem; color: var(--gray-800); margin-bottom: 24px; }
+
+        @media (max-width: 640px) {
+            .upload-zone { padding: 32px 16px; }
+            .results-header { flex-direction: column; align-items: flex-start; }
+            .results-actions { width: 100%; }
+            .results-actions button { flex: 1; justify-content: center; }
+            .score-card { flex-direction: column; text-align: center; }
+            .language-grid { grid-template-columns: 1fr; }
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 20px 0;
+        }
+
+        .table-scroll table {
+            margin: 0;
         }
 
         @media (max-width: 640px) {
+            .container { padding: 16px; }
+            .toolbar {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+                padding: 16px;
+            }
             .profile-header { flex-direction: column; text-align: center; }
+            .profile-avatar { width: 80px; height: 80px; font-size: 1.75rem; margin: 0 auto; }
+            .profile-name { font-size: 1.5rem; }
+            .profile-role { font-size: 1rem; }
             .profile-links { justify-content: center; }
+            .profile-link { padding: 6px 12px; font-size: 0.85rem; }
             .profile-meta { grid-template-columns: 1fr; }
-            .dossier { padding: 24px; }
+            .dossier { padding: 20px; }
+            h2 { font-size: 1.25rem; margin-top: 32px; }
+            h3 { font-size: 1.1rem; margin-top: 24px; }
+            h4 { font-size: 1rem; }
+            .table-scroll { margin: 16px -20px; padding: 0 20px; }
+            table { font-size: 0.8rem; min-width: 480px; }
+            th, td { padding: 8px 10px; }
+            blockquote { padding: 12px 16px; margin: 16px 0; font-size: 0.95rem; }
+            ul, ol { padding-left: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="dossier">
+        <div class="toolbar">
+            <span class="last-updated">Last updated: February 3, 2026</span>
+            <button class="btn-download" onclick="downloadPDF()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download PDF
+            </button>
+        </div>
+        <div class="dossier" id="dossier-content">
             <!-- Profile Header -->
             <header class="profile-header">
                 <div class="profile-avatar">SG</div>
@@ -492,6 +979,165 @@
                 </tbody>
             </table>
 
+            <!-- Company Positioning Section -->
+            <h2>Company Positioning Analysis</h2>
+            <p class="section-intro">Upload your company briefing to generate personalized positioning recommendations for this investor.</p>
+
+            <div id="positioning-container">
+                <!-- Upload State -->
+                <div id="positioning-upload" class="positioning-state">
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                        </div>
+                        <p class="upload-text">Drag and drop your company briefing here</p>
+                        <p class="upload-subtext">or click to browse (PDF or DOCX, max 10MB)</p>
+                        <input type="file" id="file-input" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+                    </div>
+                    <div class="upload-form" id="upload-form" style="display: none;">
+                        <div class="file-preview">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span id="file-name"></span>
+                            <button type="button" class="btn-remove" id="btn-remove-file">Remove</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="company-name">Company Name</label>
+                            <input type="text" id="company-name" placeholder="Enter your company name" required>
+                        </div>
+                        <button type="button" class="btn-primary btn-upload" id="btn-upload">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            Upload & Analyze
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analyzing State -->
+                <div id="positioning-analyzing" class="positioning-state" style="display: none;">
+                    <div class="analyzing-container">
+                        <div class="spinner"></div>
+                        <p class="analyzing-text" id="analyzing-text">Uploading briefing...</p>
+                        <p class="analyzing-subtext">This may take a minute while we analyze your company against the investor's thesis.</p>
+                    </div>
+                </div>
+
+                <!-- Results State -->
+                <div id="positioning-results" class="positioning-state" style="display: none;">
+                    <div class="results-header">
+                        <div class="results-meta">
+                            <span class="company-badge" id="result-company-name"></span>
+                            <span class="file-badge" id="result-filename"></span>
+                        </div>
+                        <div class="results-actions">
+                            <button type="button" class="btn-secondary" id="btn-regenerate">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Regenerate
+                            </button>
+                            <button type="button" class="btn-secondary" id="btn-replace">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                Replace Briefing
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Alignment Score -->
+                    <div class="score-card">
+                        <div class="score-circle" id="score-circle">
+                            <span class="score-value" id="score-value">--</span>
+                        </div>
+                        <div class="score-info">
+                            <h4>Alignment Score</h4>
+                            <p id="score-rationale"></p>
+                        </div>
+                    </div>
+
+                    <!-- Executive Summary -->
+                    <div class="result-section">
+                        <h4>Executive Summary</h4>
+                        <p id="executive-summary"></p>
+                    </div>
+
+                    <!-- Pitch Recommendations -->
+                    <div class="result-section">
+                        <h4>Recommended One-Liner</h4>
+                        <blockquote id="one-liner"></blockquote>
+
+                        <h4>Opening Hook</h4>
+                        <p id="opening-hook"></p>
+
+                        <h4>Key Messages to Emphasize</h4>
+                        <ul id="key-messages"></ul>
+                    </div>
+
+                    <!-- Key Alignments -->
+                    <div class="result-section">
+                        <h4>Key Alignments</h4>
+                        <div id="key-alignments"></div>
+                    </div>
+
+                    <!-- Portfolio Analogies -->
+                    <div class="result-section">
+                        <h4>Portfolio Analogies to Use</h4>
+                        <div id="portfolio-analogies"></div>
+                    </div>
+
+                    <!-- Potential Concerns -->
+                    <div class="result-section">
+                        <h4>Potential Concerns & Mitigations</h4>
+                        <div id="potential-concerns"></div>
+                    </div>
+
+                    <!-- Language Guidance -->
+                    <div class="result-section">
+                        <h4>Language Guidance</h4>
+                        <div class="language-grid">
+                            <div class="language-col">
+                                <h5 class="label-use">Terms to Use</h5>
+                                <div id="terms-to-use" class="tag-list"></div>
+                            </div>
+                            <div class="language-col">
+                                <h5 class="label-avoid">Terms to Avoid</h5>
+                                <div id="terms-to-avoid" class="tag-list"></div>
+                            </div>
+                        </div>
+                        <h5>Framing Tips</h5>
+                        <ul id="framing-tips"></ul>
+                    </div>
+
+                    <!-- Anticipated Questions -->
+                    <div class="result-section">
+                        <h4>Anticipated Questions</h4>
+                        <div id="anticipated-questions"></div>
+                    </div>
+
+                    <!-- Next Steps -->
+                    <div class="result-section">
+                        <h4>Recommended Next Steps</h4>
+                        <ul id="next-steps" class="checklist"></ul>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="positioning-error" class="positioning-state" style="display: none;">
+                    <div class="error-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="error-text" id="error-text">An error occurred</p>
+                        <button type="button" class="btn-primary" id="btn-try-again">Try Again</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Sources -->
             <h2>Research Sources</h2>
             <ul>
@@ -504,5 +1150,447 @@
             </ul>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        // Wrap tables in scrollable containers for mobile
+        document.querySelectorAll('table').forEach(table => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-scroll';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        });
+
+        function downloadPDF() {
+            const element = document.getElementById('dossier-content');
+            const btn = document.querySelector('.btn-download');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="animation: spin 1s linear infinite;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Generating...';
+            btn.disabled = true;
+
+            const uploadState = document.getElementById('positioning-upload');
+            const analyzingState = document.getElementById('positioning-analyzing');
+            const errorState = document.getElementById('positioning-error');
+            const resultsState = document.getElementById('positioning-results');
+            const resultsActions = document.querySelector('.results-actions');
+
+            const uploadDisplay = uploadState.style.display;
+            const analyzingDisplay = analyzingState.style.display;
+            const errorDisplay = errorState.style.display;
+
+            uploadState.style.display = 'none';
+            analyzingState.style.display = 'none';
+            errorState.style.display = 'none';
+            if (resultsActions) resultsActions.style.display = 'none';
+
+            element.classList.add('pdf-rendering');
+
+            const opt = {
+                margin: [10, 15, 10, 15],
+                filename: 'Saurabh-Gupta-Investor-Dossier.pdf',
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight,
+                    onclone: function(clonedDoc) {
+                        const clonedElement = clonedDoc.getElementById('dossier-content');
+                        if (clonedElement) {
+                            clonedElement.style.height = 'auto';
+                            clonedElement.style.overflow = 'visible';
+                        }
+                    }
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: {
+                    mode: ['css', 'legacy'],
+                    before: '.page-break-before',
+                    after: '.page-break-after',
+                    avoid: ['tr', 'blockquote', 'h2', 'h3', 'h4', 'h5', 'li', '.alignment-card', '.concern-card', '.question-card', '.analogy-card', '.score-card', '.score-info', '.result-section', '.language-grid', '.tag-list', '.mitigation', '.response']
+                }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                element.classList.remove('pdf-rendering');
+                uploadState.style.display = uploadDisplay;
+                analyzingState.style.display = analyzingDisplay;
+                errorState.style.display = errorDisplay;
+                if (resultsActions) resultsActions.style.display = '';
+            }).catch(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                element.classList.remove('pdf-rendering');
+                uploadState.style.display = uploadDisplay;
+                analyzingState.style.display = analyzingDisplay;
+                errorState.style.display = errorDisplay;
+                if (resultsActions) resultsActions.style.display = '';
+                window.print();
+            });
+        }
+    </script>
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media print { .toolbar { display: none !important; } }
+    </style>
+
+    <script>
+    // Company Positioning Feature
+    (function() {
+        const INVESTOR_SLUG = 'saurabh-gupta';
+
+        // DOM Elements
+        const uploadState = document.getElementById('positioning-upload');
+        const analyzingState = document.getElementById('positioning-analyzing');
+        const resultsState = document.getElementById('positioning-results');
+        const errorState = document.getElementById('positioning-error');
+
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadForm = document.getElementById('upload-form');
+        const fileNameEl = document.getElementById('file-name');
+        const companyNameInput = document.getElementById('company-name');
+
+        const btnRemoveFile = document.getElementById('btn-remove-file');
+        const btnUpload = document.getElementById('btn-upload');
+        const btnRegenerate = document.getElementById('btn-regenerate');
+        const btnReplace = document.getElementById('btn-replace');
+        const btnTryAgain = document.getElementById('btn-try-again');
+
+        const analyzingText = document.getElementById('analyzing-text');
+        const errorText = document.getElementById('error-text');
+
+        let selectedFile = null;
+        let currentBriefingId = null;
+
+        function showState(state) {
+            [uploadState, analyzingState, resultsState, errorState].forEach(el => {
+                el.style.display = 'none';
+            });
+            state.style.display = 'block';
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            showState(errorState);
+        }
+
+        async function checkExistingBriefing() {
+            try {
+                const res = await fetch(`/api/get-positioning?investorSlug=${INVESTOR_SLUG}`);
+                const data = await res.json();
+
+                if (data.success && data.hasBriefing && data.analysis) {
+                    currentBriefingId = data.briefing.id;
+                    displayResults(data.briefing, data.analysis);
+                }
+            } catch (err) {
+                console.log('No existing briefing found');
+            }
+        }
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            const validTypes = [
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ];
+            const validExtensions = ['.pdf', '.docx'];
+            const extension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+
+            if (!validTypes.includes(file.type) && !validExtensions.includes(extension)) {
+                alert('Please select a PDF or DOCX file.');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File too large. Maximum size is 10MB.');
+                return;
+            }
+
+            selectedFile = file;
+            fileNameEl.textContent = file.name;
+            uploadForm.style.display = 'block';
+        }
+
+        btnRemoveFile.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            uploadForm.style.display = 'none';
+            companyNameInput.value = '';
+        });
+
+        btnUpload.addEventListener('click', async () => {
+            if (!selectedFile) {
+                alert('Please select a file.');
+                return;
+            }
+
+            const companyName = companyNameInput.value.trim();
+            if (!companyName) {
+                alert('Please enter your company name.');
+                companyNameInput.focus();
+                return;
+            }
+
+            await uploadAndAnalyze(selectedFile, companyName);
+        });
+
+        async function uploadAndAnalyze(file, companyName) {
+            showState(analyzingState);
+            analyzingText.textContent = 'Uploading briefing...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('companyName', companyName);
+                formData.append('investorSlug', INVESTOR_SLUG);
+
+                const uploadRes = await fetch('/api/upload-briefing', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadRes.ok) {
+                    const error = await uploadRes.json();
+                    throw new Error(error.error || 'Upload failed');
+                }
+
+                const uploadData = await uploadRes.json();
+                currentBriefingId = uploadData.briefingId;
+
+                analyzingText.textContent = 'Analyzing positioning against investor thesis...';
+
+                const analyzeRes = await fetch('/api/analyze-positioning', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        briefingId: currentBriefingId,
+                        investorSlug: INVESTOR_SLUG
+                    })
+                });
+
+                if (!analyzeRes.ok) {
+                    const error = await analyzeRes.json();
+                    throw new Error(error.error || 'Analysis failed');
+                }
+
+                const analyzeData = await analyzeRes.json();
+
+                displayResults({
+                    companyName,
+                    filename: file.name
+                }, analyzeData.analysis);
+
+            } catch (err) {
+                console.error('Error:', err);
+                showError(err.message || 'An error occurred. Please try again.');
+            }
+        }
+
+        function displayResults(briefing, analysis) {
+            document.getElementById('result-company-name').textContent = briefing.companyName;
+            document.getElementById('result-filename').textContent = briefing.filename;
+
+            const score = analysis.alignmentScore || 0;
+            document.getElementById('score-value').textContent = score;
+            document.getElementById('score-rationale').textContent = analysis.alignmentRationale || '';
+
+            const scoreCircle = document.getElementById('score-circle');
+            if (score >= 70) {
+                scoreCircle.style.background = 'linear-gradient(135deg, #dcfce7, #bbf7d0)';
+            } else if (score >= 40) {
+                scoreCircle.style.background = 'linear-gradient(135deg, #fef9c3, #fde68a)';
+            } else {
+                scoreCircle.style.background = 'linear-gradient(135deg, #fee2e2, #fecaca)';
+            }
+
+            document.getElementById('executive-summary').textContent = analysis.executiveSummary || '';
+
+            const pitch = analysis.pitchRecommendations || {};
+            document.getElementById('one-liner').textContent = pitch.oneLiner || '';
+            document.getElementById('opening-hook').textContent = pitch.openingHook || '';
+
+            const keyMessages = document.getElementById('key-messages');
+            keyMessages.innerHTML = (pitch.keyMessages || [])
+                .map(msg => `<li>${escapeHtml(msg)}</li>`)
+                .join('');
+
+            const alignmentsContainer = document.getElementById('key-alignments');
+            alignmentsContainer.innerHTML = (analysis.keyAlignments || [])
+                .map(a => `
+                    <div class="alignment-card">
+                        <h5>${escapeHtml(a.area)}</h5>
+                        <p>${escapeHtml(a.explanation)}</p>
+                        ${a.evidence ? `<p class="evidence">"${escapeHtml(a.evidence)}"</p>` : ''}
+                    </div>
+                `).join('');
+
+            const analogiesContainer = document.getElementById('portfolio-analogies');
+            analogiesContainer.innerHTML = (pitch.portfolioAnalogies || [])
+                .map(a => `
+                    <div class="analogy-card">
+                        <h5>${escapeHtml(a.company)}</h5>
+                        <p>${escapeHtml(a.analogy)}</p>
+                    </div>
+                `).join('');
+
+            const concernsContainer = document.getElementById('potential-concerns');
+            concernsContainer.innerHTML = (analysis.potentialConcerns || [])
+                .map(c => `
+                    <div class="concern-card">
+                        <h5>${escapeHtml(c.concern)}</h5>
+                        <div class="mitigation">
+                            <p class="mitigation-label">Mitigation</p>
+                            <p>${escapeHtml(c.mitigation)}</p>
+                            ${c.talkingPoint ? `<p style="margin-top:8px;font-style:italic;">"${escapeHtml(c.talkingPoint)}"</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+            const lang = analysis.languageGuidance || {};
+
+            const termsToUse = document.getElementById('terms-to-use');
+            termsToUse.innerHTML = (lang.termsToUse || [])
+                .map(t => `<span class="tag-use">${escapeHtml(t)}</span>`)
+                .join('');
+
+            const termsToAvoid = document.getElementById('terms-to-avoid');
+            termsToAvoid.innerHTML = (lang.termsToAvoid || [])
+                .map(t => `<span class="tag-avoid">${escapeHtml(t)}</span>`)
+                .join('');
+
+            const framingTips = document.getElementById('framing-tips');
+            framingTips.innerHTML = (lang.framingTips || [])
+                .map(tip => `<li>${escapeHtml(tip)}</li>`)
+                .join('');
+
+            const questionsContainer = document.getElementById('anticipated-questions');
+            questionsContainer.innerHTML = (analysis.anticipatedQuestions || [])
+                .map(q => `
+                    <div class="question-card">
+                        <h5>"${escapeHtml(q.question)}"</h5>
+                        <div class="response">
+                            <p class="response-label">Suggested Response</p>
+                            <p>${escapeHtml(q.suggestedResponse)}</p>
+                            ${q.keyPoints && q.keyPoints.length > 0 ? `
+                                <ul style="margin-top:8px;margin-bottom:0;">
+                                    ${q.keyPoints.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+                                </ul>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+            const nextSteps = document.getElementById('next-steps');
+            nextSteps.innerHTML = (analysis.nextSteps || [])
+                .map(step => `<li>${escapeHtml(step)}</li>`)
+                .join('');
+
+            showState(resultsState);
+
+            selectedFile = null;
+            fileInput.value = '';
+            uploadForm.style.display = 'none';
+            companyNameInput.value = '';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        btnRegenerate.addEventListener('click', async () => {
+            if (!currentBriefingId) {
+                showError('No briefing to regenerate. Please upload a new briefing.');
+                return;
+            }
+
+            showState(analyzingState);
+            analyzingText.textContent = 'Regenerating positioning analysis...';
+
+            try {
+                const res = await fetch('/api/analyze-positioning', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        briefingId: currentBriefingId,
+                        investorSlug: INVESTOR_SLUG
+                    })
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || 'Regeneration failed');
+                }
+
+                const data = await res.json();
+
+                const getRes = await fetch(`/api/get-positioning?briefingId=${currentBriefingId}`);
+                const briefingData = await getRes.json();
+
+                displayResults(briefingData.briefing, data.analysis);
+
+            } catch (err) {
+                console.error('Error:', err);
+                showError(err.message || 'Failed to regenerate. Please try again.');
+            }
+        });
+
+        btnReplace.addEventListener('click', async () => {
+            if (currentBriefingId) {
+                try {
+                    await fetch(`/api/delete-briefing?briefingId=${currentBriefingId}`, {
+                        method: 'DELETE'
+                    });
+                } catch (err) {
+                    console.log('Could not delete old briefing:', err);
+                }
+            }
+
+            currentBriefingId = null;
+            showState(uploadState);
+        });
+
+        btnTryAgain.addEventListener('click', () => {
+            showState(uploadState);
+        });
+
+        checkExistingBriefing();
+    })();
+    </script>
 </body>
 </html>

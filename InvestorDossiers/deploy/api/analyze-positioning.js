@@ -115,6 +115,140 @@ engagement:
     - question: "What's defensible? Can't [Big Tech] + [Incumbent] do this?"
     - question: "How do you handle LLM non-determinism in production?"
     - question: "Walk me through cohort retention economics"
+---`,
+
+  'saurabh-gupta': `---
+name: "Saurabh Gupta"
+firm: "DST Global"
+role: "Co-Founder & Managing Partner"
+team: "Growth & Late Stage"
+email: ""
+
+investment_focus:
+  areas:
+    - "Consumer Internet"
+    - "Enterprise Software"
+    - "FinTech"
+    - "AI/ML"
+    - "Payments"
+    - "Travel & Hospitality"
+    - "E-commerce"
+  stages:
+    - "Series B"
+    - "Series C"
+    - "Series D"
+    - "Growth"
+  check_size:
+    min: "$15M"
+    max: "$200M"
+    sweet_spot: "$25M"
+
+background:
+  previous_roles:
+    - company: "JPMorgan"
+      role: "Investment Banking Advisory"
+      description: "IB advisory experience before transitioning to venture capital"
+    - company: "Phonethics Mobile Media"
+      role: "CEO & Founder"
+      description: "Founded mobile media startup before co-founding DST Global"
+  education:
+    - institution: "Management Development Institute (MDI)"
+      field: "MBA"
+  notable_traits:
+    - "Co-founded one of the world's largest VC firms ($50B AUM)"
+    - "Pioneer of founder-friendly investment terms"
+    - "Deep expertise in emerging markets (India, LatAm)"
+    - "Low-profile, relationship-driven investor"
+
+portfolio:
+  board_observer:
+    - name: "Brex"
+      description: "Corporate cards and spend management for startups"
+    - name: "Swiggy"
+      description: "India's leading food delivery platform"
+    - name: "Udaan"
+      description: "India's largest B2B e-commerce platform"
+    - name: "Rappi"
+      description: "Latin America's super app for delivery"
+  led_investments:
+    - name: "Airbnb"
+      description: "Global accommodation marketplace"
+  other_investments:
+    - name: "Safe Superintelligence"
+      description: "Ilya Sutskever's AI safety focused lab - $1B at $5B valuation"
+    - name: "Mistral AI"
+      description: "European AI foundation model company - $600M at $5.8B"
+    - name: "Poolside"
+      description: "AI for software development - $500M at $3B"
+    - name: "Harvey"
+      description: "AI for legal professionals - 1000+ customers globally"
+    - name: "Anysphere"
+      description: "Cursor AI coding assistant - $900M round"
+    - name: "Chime"
+      description: "Digital banking platform"
+    - name: "Whatnot"
+      description: "Live shopping and marketplace platform"
+  historic_portfolio:
+    - name: "Facebook"
+      description: "Social networking - IPO 2012"
+    - name: "Twitter"
+      description: "Social media - $400M at $8B (2011)"
+    - name: "WhatsApp"
+      description: "Messaging - Acquired by Meta for $19B"
+    - name: "Spotify"
+      description: "Music streaming - IPO 2018"
+    - name: "Alibaba"
+      description: "E-commerce - IPO 2014"
+    - name: "Nubank"
+      description: "Latin America's largest digital bank - IPO 2021"
+    - name: "Klarna"
+      description: "Buy now, pay later - NYSE listed"
+
+thesis:
+  core_philosophy: "Invest in category-defining companies with founder-friendly terms, taking concentrated positions in late-stage growth companies that are already winning their markets"
+  key_concepts:
+    - name: "Founder-Friendly Terms"
+      description: "No board seats, proxy votes assigned to founders. Pioneered by DST in Facebook/Twitter deals - belief that founders know best how to run their companies."
+    - name: "Category Leaders"
+      description: "Focus on companies that are already winning their markets, not early bets on unproven categories. Proven traction, clear market dominance, validated unit economics."
+    - name: "Concentrated Positions"
+      description: "Large checks ($15M-$200M) in fewer companies rather than spray-and-pray approach."
+    - name: "Global Arbitrage"
+      description: "Identifying winners in emerging markets (India, LatAm, China) that mirror successful US models."
+  patterns:
+    - "Category-defining market leaders"
+    - "Strong network effects or marketplace dynamics"
+    - "Proven unit economics at scale"
+    - "Exceptional founder teams"
+    - "Large addressable markets ($10B+)"
+    - "Clear path to profitability or IPO"
+  anti_patterns:
+    - "Early-stage unproven concepts"
+    - "Companies requiring heavy operational support"
+    - "Situations requiring board control"
+    - "Small check sizes or highly dilutive terms"
+
+engagement:
+  do:
+    - "Come with proven traction and metrics (they invest in winners)"
+    - "Emphasize market leadership position"
+    - "Show clear path to massive scale ($1B+ revenue potential)"
+    - "Highlight network effects or defensible moats"
+    - "Be prepared for large check sizes ($25M+ sweet spot)"
+    - "Demonstrate founder control and long-term vision"
+    - "Reference successful DST portfolio companies as analogies"
+  dont:
+    - "Pitch early-stage unproven concepts"
+    - "Expect hands-on operational involvement"
+    - "Request board seats (they don't take them either)"
+    - "Focus on small markets or niche opportunities"
+    - "Underestimate their global portfolio knowledge"
+  questions_they_ask:
+    - question: "What's your market position vs. competitors?"
+    - question: "What are your unit economics at scale?"
+    - question: "What's the path to $1B+ in revenue?"
+    - question: "Why raise from DST specifically?"
+    - question: "How do you think about the AI opportunity?"
 ---`
 };
 
