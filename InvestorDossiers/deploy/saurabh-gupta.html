@@ -2078,22 +2078,10 @@
             const lastUpdated = document.getElementById('last-updated');
             if (lastUpdated && data.generatedAt) {
                 const date = new Date(data.generatedAt);
-                lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (AI Generated)`;
+                lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
             }
 
-            // Render the AI-generated profile with sources
-            const aiProfileContainer = document.getElementById('ai-generated-profile');
-            if (aiProfileContainer && data.profile) {
-                aiProfileContainer.innerHTML = renderAIProfile(data.profile, verification);
-                aiProfileContainer.classList.add('active');
-
-                // Hide the static profile sections
-                const staticSections = document.querySelectorAll('.static-profile-section');
-                staticSections.forEach(section => section.style.display = 'none');
-
-                // Scroll to top to see the new profile
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            // Profile stored successfully - static profile remains visible
 
         } catch (err) {
             console.error('Profile regeneration error:', err);
@@ -2153,49 +2141,38 @@
         return div.innerHTML;
     }
 
-    // Check for stored profile on page load and render if exists
+    // Check for stored profile on page load
     async function checkStoredProfile() {
         try {
             const response = await fetch(`/api/get-profile?investorSlug=${PROFILE_INVESTOR_SLUG}`);
             const data = await response.json();
 
-            if (data.success && data.hasStoredProfile && data.profile) {
+            if (data.success && data.hasStoredProfile && data.generatedAt) {
                 // Update the last updated date
                 const lastUpdated = document.getElementById('last-updated');
-                if (lastUpdated && data.generatedAt) {
+                if (lastUpdated) {
                     const date = new Date(data.generatedAt);
-                    lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} (AI Generated)`;
+                    lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
                 }
 
-                // Show verification banner
-                const verificationBanner = document.getElementById('profile-verification-banner');
-                const verificationText = document.getElementById('profile-verification-text');
-                const verificationIcon = document.getElementById('profile-verification-icon');
-
+                // Show verification banner if available
                 if (data.verification) {
+                    const verificationBanner = document.getElementById('profile-verification-banner');
+                    const verificationText = document.getElementById('profile-verification-text');
+                    const verificationIcon = document.getElementById('profile-verification-icon');
+
                     verificationBanner.style.display = 'flex';
                     const coverage = data.verification.sourceStats?.sourceCoveragePercent || 0;
 
                     if (data.verification.isValid) {
                         verificationBanner.className = 'verification-banner passed';
                         verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
-                        verificationText.textContent = `AI-generated profile with ${coverage}% source coverage.`;
+                        verificationText.textContent = `Profile verified with ${coverage}% source coverage.`;
                     } else {
                         verificationBanner.className = 'verification-banner warning';
                         verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />';
-                        verificationText.textContent = `AI-generated profile with ${coverage}% source coverage. Some claims may need verification.`;
+                        verificationText.textContent = `Profile has ${coverage}% source coverage. Some claims may need verification.`;
                     }
-                }
-
-                // Render the stored AI profile
-                const aiProfileContainer = document.getElementById('ai-generated-profile');
-                if (aiProfileContainer) {
-                    aiProfileContainer.innerHTML = renderAIProfile(data.profile, data.verification);
-                    aiProfileContainer.classList.add('active');
-
-                    // Hide static profile sections
-                    const staticSections = document.querySelectorAll('.static-profile-section');
-                    staticSections.forEach(section => section.style.display = 'none');
                 }
             }
         } catch (err) {
