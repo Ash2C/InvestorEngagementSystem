@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Investor Dossier</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--gray-900);
+        }
+
+        .header-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--gray-800);
+            text-decoration: none;
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+
+        .header-link:hover {
+            background: var(--gray-200);
+            color: var(--primary);
+        }
+
+        .header-link svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            color: var(--gray-600);
+            margin-bottom: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: var(--gray-400);
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-primary:disabled {
+            background: var(--gray-300);
+            cursor: not-allowed;
+        }
+
+        .btn-primary svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: white;
+            color: var(--gray-800);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+
+        .btn-secondary svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Loading State */
+        .loading-state {
+            display: none;
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .loading-state.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+        }
+
+        .loading-subtext {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .loading-warning {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: #fef9c3;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #854d0e;
+        }
+
+        .loading-warning svg {
+            flex-shrink: 0;
+            color: #f59e0b;
+        }
+
+        /* Results State */
+        .results-state {
+            display: none;
+        }
+
+        .results-state.active {
+            display: block;
+        }
+
+        .verification-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .verification-banner.passed {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .verification-banner.warning {
+            background: #fef9c3;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+
+        .verification-banner.flagged {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .verification-banner svg {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+        }
+
+        .verification-details {
+            flex: 1;
+        }
+
+        .verification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .verification-stats {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* Dossier Preview */
+        .dossier-preview {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 32px;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 24px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 32px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--gray-900);
+        }
+
+        .profile-role {
+            font-size: 1rem;
+            color: var(--gray-600);
+            margin-bottom: 12px;
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--gray-100);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+        }
+
+        .meta-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .section-content {
+            color: var(--gray-700);
+        }
+
+        .section-content p {
+            margin-bottom: 12px;
+        }
+
+        .list-item {
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .list-item-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .list-item-description {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .list-item-source {
+            font-size: 0.8rem;
+            color: var(--primary);
+            margin-top: 4px;
+        }
+
+        .list-item-source a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .list-item-source a:hover {
+            text-decoration: underline;
+        }
+
+        /* Source Stats */
+        .source-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .source-stat {
+            text-align: center;
+        }
+
+        .source-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .source-stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-top: 4px;
+        }
+
+        /* Error State */
+        .error-state {
+            display: none;
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .error-state.active {
+            display: block;
+        }
+
+        .error-icon {
+            color: #dc2626;
+            margin-bottom: 16px;
+        }
+
+        .error-text {
+            font-size: 1.1rem;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+        }
+
+        .error-details {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            margin-bottom: 24px;
+        }
+
+        /* Previously Generated */
+        .previous-dossiers {
+            margin-top: 32px;
+        }
+
+        .previous-dossiers h3 {
+            font-size: 1.1rem;
+            color: var(--gray-700);
+            margin-bottom: 16px;
+        }
+
+        .dossier-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .dossier-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .dossier-list-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .dossier-list-info {
+            flex: 1;
+        }
+
+        .dossier-list-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 2px;
+        }
+
+        .dossier-list-meta {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .dossier-list-badge {
+            padding: 4px 10px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-avatar {
+                margin: 0 auto;
+            }
+
+            .profile-meta {
+                justify-content: center;
+            }
+
+            .results-actions {
+                flex-direction: column;
+            }
+
+            .results-actions a,
+            .results-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Generate Investor Dossier</h1>
+            <div class="header-links">
+                <a href="/index.html" class="header-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Yoko Li
+                </a>
+                <a href="/saurabh-gupta.html" class="header-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Saurabh Gupta
+                </a>
+            </div>
+        </div>
+
+        <!-- Form State -->
+        <div id="form-state" class="card">
+            <h2 class="card-title">Create a New Investor Dossier</h2>
+            <p class="card-description">Enter the investor's details below. Claude AI will research and compile a comprehensive dossier with source citations.</p>
+
+            <form id="generate-form" onsubmit="handleSubmit(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" placeholder="e.g., Marc" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" placeholder="e.g., Andreessen" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="company">Company / Firm *</label>
+                    <input type="text" id="company" name="company" placeholder="e.g., Andreessen Horowitz" required>
+                </div>
+                <button type="submit" class="btn-primary" id="submit-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Generate Dossier
+                </button>
+            </form>
+
+            <!-- Previously Generated Dossiers -->
+            <div id="previous-dossiers" class="previous-dossiers" style="display: none;">
+                <h3>Previously Generated Dossiers</h3>
+                <div id="dossier-list" class="dossier-list"></div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="card loading-state">
+            <div class="spinner"></div>
+            <p class="loading-text" id="loading-text">Researching investor...</p>
+            <p class="loading-subtext" id="loading-subtext">This may take 1-2 minutes as we compile comprehensive data with sources.</p>
+            <div class="loading-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Please don't close this page while generating.
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="card error-state">
+            <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="error-text" id="error-text">Failed to generate dossier</p>
+            <p class="error-details" id="error-details"></p>
+            <button class="btn-secondary" onclick="resetForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Try Again
+            </button>
+        </div>
+
+        <!-- Results State -->
+        <div id="results-state" class="results-state">
+            <div id="verification-banner" class="verification-banner passed">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="verification-details">
+                    <div class="verification-title" id="verification-title">Dossier Generated Successfully</div>
+                    <div class="verification-stats" id="verification-stats"></div>
+                </div>
+            </div>
+
+            <div class="source-stats" id="source-stats"></div>
+
+            <div class="results-actions">
+                <a href="#" id="view-full-link" class="btn-primary" style="flex: 1;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View Full Dossier
+                </a>
+                <button class="btn-secondary" onclick="resetForm()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Generate Another
+                </button>
+            </div>
+
+            <!-- Dossier Preview -->
+            <div id="dossier-preview" class="dossier-preview"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load previously generated dossiers on page load
+        document.addEventListener('DOMContentLoaded', loadPreviousDossiers);
+
+        async function loadPreviousDossiers() {
+            try {
+                const response = await fetch('/api/list-dossiers');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.dossiers && data.dossiers.length > 0) {
+                        renderPreviousDossiers(data.dossiers);
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load previous dossiers:', err);
+            }
+        }
+
+        function renderPreviousDossiers(dossiers) {
+            const container = document.getElementById('previous-dossiers');
+            const list = document.getElementById('dossier-list');
+
+            const html = dossiers.map(d => `
+                <a href="/dossier.html?investor=${encodeURIComponent(d.slug)}" class="dossier-list-item">
+                    <div class="dossier-list-info">
+                        <div class="dossier-list-name">${escapeHtml(d.name)}</div>
+                        <div class="dossier-list-meta">${escapeHtml(d.company)} &middot; ${formatDate(d.generatedAt)}</div>
+                    </div>
+                    <div class="dossier-list-badge">${d.sourceCoverage}% sourced</div>
+                </a>
+            `).join('');
+
+            list.innerHTML = html;
+            container.style.display = 'block';
+        }
+
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const company = document.getElementById('company').value.trim();
+
+            if (!firstName || !lastName || !company) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('form-state').style.display = 'none';
+            document.getElementById('loading-state').classList.add('active');
+            document.getElementById('error-state').classList.remove('active');
+            document.getElementById('results-state').classList.remove('active');
+
+            // Update loading text
+            const loadingSteps = [
+                'Searching for investor information...',
+                'Analyzing LinkedIn and Crunchbase...',
+                'Gathering portfolio data...',
+                'Compiling news and media appearances...',
+                'Generating comprehensive profile...',
+                'Verifying sources...'
+            ];
+
+            let stepIndex = 0;
+            const loadingInterval = setInterval(() => {
+                stepIndex = (stepIndex + 1) % loadingSteps.length;
+                document.getElementById('loading-text').textContent = loadingSteps[stepIndex];
+            }, 10000);
+
+            try {
+                const response = await fetch('/api/generate-dossier', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, company })
+                });
+
+                clearInterval(loadingInterval);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to generate dossier');
+                }
+
+                const data = await response.json();
+                showResults(data);
+
+            } catch (err) {
+                clearInterval(loadingInterval);
+                showError(err.message);
+            }
+        }
+
+        function showResults(data) {
+            document.getElementById('loading-state').classList.remove('active');
+            document.getElementById('results-state').classList.add('active');
+
+            // Set verification banner
+            const banner = document.getElementById('verification-banner');
+            const title = document.getElementById('verification-title');
+            const stats = document.getElementById('verification-stats');
+            const verification = data.verification || {};
+            const sourceStats = verification.sourceStats || {};
+
+            if (verification.isValid) {
+                banner.className = 'verification-banner passed';
+                title.textContent = 'Dossier Generated Successfully';
+                stats.textContent = `${sourceStats.sourceCoveragePercent || 0}% source coverage with ${sourceStats.uniqueSourceCount || 0} unique sources.`;
+            } else if (verification.summary && verification.summary.highSeverity > 0) {
+                banner.className = 'verification-banner flagged';
+                title.textContent = 'Dossier Generated with Warnings';
+                stats.textContent = `${verification.summary.highSeverity} unverified claim(s). Review sources carefully.`;
+            } else {
+                banner.className = 'verification-banner warning';
+                title.textContent = 'Dossier Generated';
+                stats.textContent = `${sourceStats.sourceCoveragePercent || 0}% source coverage. Some claims may need verification.`;
+            }
+
+            // Set source stats
+            const statsContainer = document.getElementById('source-stats');
+            statsContainer.innerHTML = `
+                <div class="source-stat">
+                    <div class="source-stat-value">${sourceStats.uniqueSourceCount || 0}</div>
+                    <div class="source-stat-label">Unique Sources</div>
+                </div>
+                <div class="source-stat">
+                    <div class="source-stat-value">${sourceStats.sourceCoveragePercent || 0}%</div>
+                    <div class="source-stat-label">Source Coverage</div>
+                </div>
+                <div class="source-stat">
+                    <div class="source-stat-value">${sourceStats.claimsWithTrustedSources || 0}</div>
+                    <div class="source-stat-label">Trusted Sources</div>
+                </div>
+                <div class="source-stat">
+                    <div class="source-stat-value">${sourceStats.totalClaims || 0}</div>
+                    <div class="source-stat-label">Total Claims</div>
+                </div>
+            `;
+
+            // Set view full link
+            document.getElementById('view-full-link').href = data.viewUrl || `/dossier.html?investor=${data.investorSlug}`;
+
+            // Render dossier preview
+            renderDossierPreview(data.profile);
+        }
+
+        function renderDossierPreview(profile) {
+            const container = document.getElementById('dossier-preview');
+            const p = profile.profile || {};
+            const focus = profile.investmentFocus || {};
+            const bg = profile.background || {};
+            const thesis = profile.investmentThesis || {};
+            const portfolio = profile.portfolio || {};
+            const qa = profile.anticipatedQA || [];
+
+            const initials = (p.name || 'IN').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            let html = `
+                <div class="profile-header">
+                    <div class="profile-avatar">${initials}</div>
+                    <div class="profile-info">
+                        <h1 class="profile-name">${escapeHtml(p.name || 'Unknown Investor')}</h1>
+                        <p class="profile-role">${escapeHtml(p.role || 'Investor')} &middot; ${p.team ? escapeHtml(p.team) + ' &middot; ' : ''}${escapeHtml(p.firm || 'Unknown Firm')}</p>
+                        <div class="profile-meta">
+                            ${focus.areas && focus.areas.length ? `<span class="meta-badge">${escapeHtml(focus.areas.slice(0, 3).join(' · '))}</span>` : ''}
+                            ${focus.stages && focus.stages.length ? `<span class="meta-badge">${escapeHtml(focus.stages.join(' → '))}</span>` : ''}
+                            ${focus.checkSize && focus.checkSize.min ? `<span class="meta-badge">${escapeHtml(focus.checkSize.min)} – ${escapeHtml(focus.checkSize.max || '?')}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Background section
+            if (bg.summary) {
+                html += `
+                    <div class="section">
+                        <h2 class="section-title">Background</h2>
+                        <div class="section-content">
+                            <p>${escapeHtml(bg.summary)}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Career highlights
+            if (bg.careerHighlights && bg.careerHighlights.length > 0) {
+                html += `
+                    <div class="section">
+                        <h2 class="section-title">Career Highlights</h2>
+                        <div class="section-content">
+                            ${bg.careerHighlights.slice(0, 3).map(item => `
+                                <div class="list-item">
+                                    <div class="list-item-title">${escapeHtml(item.company)}: ${escapeHtml(item.role)}</div>
+                                    <div class="list-item-description">${escapeHtml(item.description || '')}</div>
+                                    ${item.source ? `<div class="list-item-source"><a href="${escapeHtml(item.source)}" target="_blank">View Source</a></div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Investment thesis
+            if (thesis.corePhilosophy) {
+                html += `
+                    <div class="section">
+                        <h2 class="section-title">Investment Thesis</h2>
+                        <div class="section-content">
+                            <p style="font-style: italic; border-left: 3px solid var(--primary); padding-left: 16px;">"${escapeHtml(thesis.corePhilosophy)}"</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Notable investments
+            if (portfolio.notableInvestments && portfolio.notableInvestments.length > 0) {
+                html += `
+                    <div class="section">
+                        <h2 class="section-title">Notable Investments</h2>
+                        <div class="section-content">
+                            ${portfolio.notableInvestments.slice(0, 5).map(item => `
+                                <div class="list-item">
+                                    <div class="list-item-title">${escapeHtml(item.name)}</div>
+                                    <div class="list-item-description">${escapeHtml(item.description || '')}${item.whyNotable ? ` — ${escapeHtml(item.whyNotable)}` : ''}</div>
+                                    ${item.source ? `<div class="list-item-source"><a href="${escapeHtml(item.source)}" target="_blank">View Source</a></div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Anticipated Q&A preview
+            if (qa && qa.length > 0) {
+                html += `
+                    <div class="section">
+                        <h2 class="section-title">Anticipated Questions</h2>
+                        <div class="section-content">
+                            ${qa.slice(0, 2).map(item => `
+                                <div class="list-item">
+                                    <div class="list-item-title">"${escapeHtml(item.question)}"</div>
+                                    <div class="list-item-description">${escapeHtml(item.suggestedApproach || item.exampleResponse || '')}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div style="text-align: center; padding-top: 24px; border-top: 1px solid var(--gray-200); margin-top: 24px;">
+                    <p style="color: var(--gray-600); font-size: 0.9rem;">This is a preview. View the full dossier for complete details including positioning tips, meeting prep, and all sources.</p>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function showError(message) {
+            document.getElementById('loading-state').classList.remove('active');
+            document.getElementById('error-state').classList.add('active');
+            document.getElementById('error-text').textContent = 'Failed to generate dossier';
+            document.getElementById('error-details').textContent = message;
+        }
+
+        function resetForm() {
+            document.getElementById('form-state').style.display = 'block';
+            document.getElementById('loading-state').classList.remove('active');
+            document.getElementById('error-state').classList.remove('active');
+            document.getElementById('results-state').classList.remove('active');
+            document.getElementById('generate-form').reset();
+
+            // Reload previous dossiers
+            loadPreviousDossiers();
+        }
+    </script>
+</body>
+</html>
