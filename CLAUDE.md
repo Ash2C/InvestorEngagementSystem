@@ -121,7 +121,7 @@ InvestorDossiers/reference/yoko-li-reference-dossier.html
 ## Deployment
 
 - **URL**: https://investor-dossiers.vercel.app/
-- **Platform**: Vercel (serverless)
+- **Platform**: Vercel (serverless) - **Requires Pro plan** (21 serverless functions exceed Hobby plan limit of 12)
 - **Storage**: Vercel Blob (files) + Vercel KV (metadata & profiles)
 
 ### Environment Variables
@@ -617,8 +617,11 @@ The platform supports multiple clients with isolated access to investor dossiers
 **Client Portal:**
 ```
 /portal?t={token}                      → Client's dossier list
-/portal?t={token}&investor={slug}      → View specific dossier (via portal-dossier.html)
 ```
+
+**Dossier Viewing:**
+- **Static dossiers** (yoko-li, saurabh-gupta): Link directly to full HTML pages (`/index.html`, `/saurabh-gupta.html`)
+- **AI-generated dossiers**: Use `/portal-dossier.html?t={token}&investor={slug}` which fetches from KV storage
 
 ### Data Model (Vercel KV)
 
@@ -698,6 +701,20 @@ generated-dossiers-list                        → Master list of all dossiers
 ---
 
 ## Changelog
+
+### 2026-02-04: Static Dossier Fix for Client Portal
+- **Problem**: Client portal showed minimal AI-generated content for static dossiers (yoko-li, saurabh-gupta) because `portal-dossier.html` fetches from KV storage where static dossiers don't exist
+- **Solution**: Static dossiers now link directly to their full HTML pages instead of going through `portal-dossier.html`
+- **Changes**:
+  - Updated `api/client/dossiers.js` with correct static dossier metadata and `staticUrl` property
+  - Updated `portal.html` to use `staticUrl` for static dossiers
+  - Fixed Yoko Li company name (was incorrectly "a]a Capital")
+- **Result**: Clients now see the full hand-crafted dossiers with all content, contact links, and interactive features
+
+### 2026-02-04: Vercel Pro Upgrade
+- **Problem**: Multi-tenant platform added 12 new API endpoints, bringing total to 21 serverless functions (exceeds Hobby plan limit of 12)
+- **Solution**: Upgraded to Vercel Pro plan
+- **Note**: Project now requires Vercel Pro plan for deployment
 
 ### 2026-02-04: Multi-Tenant Platform
 - Added multi-tenant support with client isolation
