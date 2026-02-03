@@ -417,6 +417,7 @@ Both static dossier pages (Yoko Li, Saurabh Gupta) include a "Regenerate Profile
 ### POST /api/analyze-positioning
 - Takes briefingId and investorSlug
 - Retrieves briefing text and investor dossier
+- **Supports both static dossiers** (yoko-li, saurabh-gupta) **and dynamically generated dossiers** from KV storage
 - Calls Claude API (claude-sonnet-4-20250514) with comprehensive prompt
 - Parses JSON response
 - Stores analysis in KV
@@ -440,6 +441,22 @@ Both static dossier pages (Yoko Li, Saurabh Gupta) include a "Regenerate Profile
 - **AI**: Anthropic Claude API (claude-sonnet-4-20250514)
 - **Storage**: Vercel Blob (files), Vercel KV (metadata & profiles)
 - **Document Parsing**: pdf-parse, mammoth
+
+### Vercel Configuration (`vercel.json`)
+
+```json
+{
+  "functions": {
+    "api/*.js": {
+      "memory": 1024,
+      "maxDuration": 300
+    }
+  }
+}
+```
+
+- **maxDuration: 300** (5 minutes) - Required for comprehensive dossier generation which involves extensive AI research
+- Memory setting is informational (ignored on Active CPU billing)
 
 ---
 
@@ -550,6 +567,15 @@ The Saurabh Gupta dossier (https://investor-dossiers.vercel.app/saurabh-gupta.ht
 ---
 
 ## Changelog
+
+### 2026-02-04: Stability Fixes & Reference Documentation
+- **API Timeout Increase**: Increased `maxDuration` from 60s to 300s (5 minutes) for all API functions in `vercel.json` to handle comprehensive dossier generation for well-known investors
+- **Better Error Handling**: Added specific try-catch for Anthropic API calls in `generate-dossier.js` with detailed error messages
+- **Positioning Analysis for Generated Dossiers**: Updated `analyze-positioning.js` to support dynamically generated dossiers by:
+  - Checking KV storage for generated profiles when not found in hardcoded list
+  - Added `convertGeneratedProfileToInvestorFormat()` function to adapt generated profile structure
+  - Positioning analysis now works for any AI-generated investor dossier
+- **Reference Documentation**: Saved Yoko Li dossier as gold standard reference in `reference/yoko-li-reference-dossier.html` with README explaining design patterns
 
 ### 2026-02-04: AI Dossier Generator
 - Added `/generate.html` - Form page to create new investor dossiers
