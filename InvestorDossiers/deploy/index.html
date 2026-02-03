@@ -632,6 +632,68 @@
             font-size: 0.85rem;
         }
 
+        /* Verification Status Styles */
+        .verification-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        .verification-banner.passed {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .verification-banner.warning {
+            background: #fef9c3;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+
+        .verification-banner.flagged {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .verification-banner svg {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+        }
+
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .verification-badge.verified {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .verification-badge.unverified {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .analogy-card .verification-badge {
+            margin-left: 0;
+            margin-top: 8px;
+            display: inline-flex;
+        }
+
         /* Error State */
         .error-container {
             text-align: center;
@@ -1055,6 +1117,14 @@
                         </div>
                     </div>
 
+                    <!-- Verification Status Banner -->
+                    <div id="verification-banner" class="verification-banner" style="display: none;">
+                        <svg id="verification-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span id="verification-text">All claims verified against investor portfolio data.</span>
+                    </div>
+
                     <!-- Executive Summary -->
                     <div class="result-section">
                         <h4>Executive Summary</h4>
@@ -1279,7 +1349,7 @@
 
                 if (data.success && data.hasBriefing && data.analysis) {
                     currentBriefingId = data.briefing.id;
-                    displayResults(data.briefing, data.analysis);
+                    displayResults(data.briefing, data.analysis, data.verification);
                 }
             } catch (err) {
                 console.log('No existing briefing found');
@@ -1406,7 +1476,7 @@
                 displayResults({
                     companyName,
                     filename: file.name
-                }, analyzeData.analysis);
+                }, analyzeData.analysis, analyzeData.verification);
 
             } catch (err) {
                 console.error('Error:', err);
@@ -1414,7 +1484,7 @@
             }
         }
 
-        function displayResults(briefing, analysis) {
+        function displayResults(briefing, analysis, verification) {
             // Update header
             document.getElementById('result-company-name').textContent = briefing.companyName;
             document.getElementById('result-filename').textContent = briefing.filename;
@@ -1433,6 +1503,9 @@
             } else {
                 scoreCircle.style.background = 'linear-gradient(135deg, #fee2e2, #fecaca)';
             }
+
+            // Display verification banner
+            displayVerificationBanner(verification);
 
             // Executive Summary
             document.getElementById('executive-summary').textContent = analysis.executiveSummary || '';
@@ -1458,15 +1531,23 @@
                     </div>
                 `).join('');
 
-            // Portfolio Analogies
+            // Portfolio Analogies - with verification badges
             const analogiesContainer = document.getElementById('portfolio-analogies');
+            const analogyVerifications = verification?.portfolioAnalogiesVerified || [];
             analogiesContainer.innerHTML = (pitch.portfolioAnalogies || [])
-                .map(a => `
+                .map((a, idx) => {
+                    const v = analogyVerifications[idx];
+                    const badgeHtml = v ? (v.verified
+                        ? '<span class="verification-badge verified">✓ Verified</span>'
+                        : '<span class="verification-badge unverified">⚠ Unverified</span>')
+                        : '';
+                    return `
                     <div class="analogy-card">
-                        <h5>${escapeHtml(a.company)}</h5>
+                        <h5>${escapeHtml(a.company)}${badgeHtml}</h5>
                         <p>${escapeHtml(a.analogy)}</p>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
 
             // Potential Concerns
             const concernsContainer = document.getElementById('potential-concerns');
@@ -1540,6 +1621,36 @@
             return div.innerHTML;
         }
 
+        function displayVerificationBanner(verification) {
+            const banner = document.getElementById('verification-banner');
+            const icon = document.getElementById('verification-icon');
+            const text = document.getElementById('verification-text');
+
+            if (!verification) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            banner.style.display = 'flex';
+            banner.className = 'verification-banner';
+
+            const status = verification.verificationStatus || 'PASSED';
+
+            if (status === 'PASSED') {
+                banner.classList.add('passed');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                text.textContent = 'All portfolio analogies verified against investor data.';
+            } else if (status === 'WARNING') {
+                banner.classList.add('warning');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />';
+                text.textContent = `${verification.unverifiedCount} portfolio analogy could not be verified. Review flagged items below.`;
+            } else {
+                banner.classList.add('flagged');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                text.textContent = `${verification.unverifiedCount} unverified claims detected. Some portfolio references may be inaccurate.`;
+            }
+        }
+
         // Button handlers
         btnRegenerate.addEventListener('click', async () => {
             if (!currentBriefingId) {
@@ -1571,7 +1682,7 @@
                 const getRes = await fetch(`/api/get-positioning?briefingId=${currentBriefingId}`);
                 const briefingData = await getRes.json();
 
-                displayResults(briefingData.briefing, data.analysis);
+                displayResults(briefingData.briefing, data.analysis, data.verification);
 
             } catch (err) {
                 console.error('Error:', err);

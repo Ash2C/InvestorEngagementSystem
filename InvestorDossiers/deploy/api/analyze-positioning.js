@@ -148,15 +148,18 @@ background:
     - company: "JPMorgan"
       role: "Investment Banking Advisory"
       description: "IB advisory experience before transitioning to venture capital"
+      source: "https://www.linkedin.com/in/saurabh-gupta-1a54b15/"
     - company: "Phonethics Mobile Media"
       role: "CEO & Founder"
       description: "Founded mobile media startup before co-founding DST Global"
+      source: "https://www.crunchbase.com/person/saurabh-gupta"
   education:
     - institution: "Management Development Institute (MDI)"
       field: "MBA"
+      source: "https://www.linkedin.com/in/saurabh-gupta-1a54b15/"
   notable_traits:
-    - "Co-founded one of the world's largest VC firms ($50B AUM)"
-    - "Pioneer of founder-friendly investment terms"
+    - "Co-founded DST Global in 2009"
+    - "Pioneer of founder-friendly investment terms (no board seats)"
     - "Deep expertise in emerging markets (India, LatAm)"
     - "Low-profile, relationship-driven investor"
 
@@ -164,45 +167,64 @@ portfolio:
   board_observer:
     - name: "Brex"
       description: "Corporate cards and spend management for startups"
+      source: "https://signal.nfx.com/investors/saurabh-gupta_1"
     - name: "Swiggy"
       description: "India's leading food delivery platform"
+      source: "https://signal.nfx.com/investors/saurabh-gupta_1"
     - name: "Udaan"
       description: "India's largest B2B e-commerce platform"
+      source: "https://signal.nfx.com/investors/saurabh-gupta_1"
     - name: "Rappi"
       description: "Latin America's super app for delivery"
+      source: "https://signal.nfx.com/investors/saurabh-gupta_1"
   led_investments:
     - name: "Airbnb"
       description: "Global accommodation marketplace"
+      source: "https://www.crunchbase.com/person/saurabh-gupta"
   other_investments:
     - name: "Safe Superintelligence"
-      description: "Ilya Sutskever's AI safety focused lab - $1B at $5B valuation"
+      description: "Ilya Sutskever's AI safety focused lab"
+      source: "https://www.reuters.com/technology/artificial-intelligence/openai-co-founder-sutskevers-new-safety-focused-ai-startup-ssi-raises-1-billion-2024-09-04/"
     - name: "Mistral AI"
-      description: "European AI foundation model company - $600M at $5.8B"
+      description: "European AI foundation model company"
+      source: "https://techcrunch.com/2024/06/11/paris-based-ai-startup-mistral-ai-raises-640-million/"
     - name: "Poolside"
-      description: "AI for software development - $500M at $3B"
+      description: "AI for software development"
+      source: "https://www.bloomberg.com/news/articles/2024-10-16/poolside-ai-raises-500-million-to-build-coding-assistant"
     - name: "Harvey"
-      description: "AI for legal professionals - 1000+ customers globally"
+      description: "AI for legal professionals"
+      source: "https://www.harvey.ai/"
     - name: "Anysphere"
-      description: "Cursor AI coding assistant - $900M round"
+      description: "Cursor AI coding assistant"
+      source: "https://techcrunch.com/2024/12/19/ai-coding-startup-anysphere-acquires-supermaven/"
     - name: "Chime"
       description: "Digital banking platform"
+      source: "https://www.crunchbase.com/organization/chime-2/company_financials"
     - name: "Whatnot"
       description: "Live shopping and marketplace platform"
+      source: "https://www.crunchbase.com/organization/whatnot/company_financials"
   historic_portfolio:
     - name: "Facebook"
       description: "Social networking - IPO 2012"
+      source: "https://en.wikipedia.org/wiki/DST_Global"
     - name: "Twitter"
-      description: "Social media - $400M at $8B (2011)"
+      description: "Social media platform"
+      source: "https://en.wikipedia.org/wiki/DST_Global"
     - name: "WhatsApp"
-      description: "Messaging - Acquired by Meta for $19B"
+      description: "Messaging - Acquired by Meta"
+      source: "https://en.wikipedia.org/wiki/DST_Global"
     - name: "Spotify"
       description: "Music streaming - IPO 2018"
+      source: "https://en.wikipedia.org/wiki/DST_Global"
     - name: "Alibaba"
       description: "E-commerce - IPO 2014"
+      source: "https://en.wikipedia.org/wiki/DST_Global"
     - name: "Nubank"
       description: "Latin America's largest digital bank - IPO 2021"
+      source: "https://en.wikipedia.org/wiki/DST_Global"
     - name: "Klarna"
-      description: "Buy now, pay later - NYSE listed"
+      description: "Buy now, pay later"
+      source: "https://en.wikipedia.org/wiki/DST_Global"
 
 thesis:
   core_philosophy: "Invest in category-defining companies with founder-friendly terms, taking concentrated positions in late-stage growth companies that are already winning their markets"
@@ -259,6 +281,67 @@ function parseInvestorYaml(content) {
     throw new Error('Invalid dossier format: missing YAML frontmatter');
   }
   return parseYaml(match[1]);
+}
+
+// Extract all portfolio company names from investor data
+function getPortfolioCompanyNames(investor) {
+  const companies = new Set();
+
+  const addCompanies = (list) => {
+    if (Array.isArray(list)) {
+      list.forEach(item => {
+        if (item.name) companies.add(item.name.toLowerCase());
+      });
+    }
+  };
+
+  addCompanies(investor.portfolio?.board_seats);
+  addCompanies(investor.portfolio?.board_observer);
+  addCompanies(investor.portfolio?.led_investments);
+  addCompanies(investor.portfolio?.other_investments);
+  addCompanies(investor.portfolio?.historic_portfolio);
+
+  return companies;
+}
+
+// Verify portfolio analogies against known portfolio
+function verifyPortfolioAnalogies(analysis, investor) {
+  const knownCompanies = getPortfolioCompanyNames(investor);
+  const analogies = analysis.pitchRecommendations?.portfolioAnalogies || [];
+  const verificationResults = [];
+
+  for (const analogy of analogies) {
+    const companyName = analogy.company?.toLowerCase() || '';
+    // Check if company name matches any known portfolio company
+    let verified = false;
+    for (const known of knownCompanies) {
+      if (companyName.includes(known) || known.includes(companyName)) {
+        verified = true;
+        break;
+      }
+    }
+    verificationResults.push({
+      company: analogy.company,
+      verified,
+      source: verified ? 'investor_portfolio' : null
+    });
+  }
+
+  return verificationResults;
+}
+
+// Basic claim verification for the analysis
+function performBasicVerification(analysis, investor) {
+  const portfolioVerification = verifyPortfolioAnalogies(analysis, investor);
+  const unverifiedAnalogies = portfolioVerification.filter(v => !v.verified);
+
+  return {
+    portfolioAnalogiesVerified: portfolioVerification,
+    hasUnverifiedClaims: unverifiedAnalogies.length > 0,
+    unverifiedCount: unverifiedAnalogies.length,
+    verificationStatus: unverifiedAnalogies.length === 0 ? 'PASSED' :
+                        unverifiedAnalogies.length <= 1 ? 'WARNING' : 'FLAGGED'
+  };
 }
 
 function buildPrompt(investor, companyBriefing, companyName) {
@@ -331,6 +414,20 @@ ${companyBriefing}
 ## YOUR TASK
 
 Analyze how ${companyName} should position themselves for a meeting with ${investor.name}. Provide a comprehensive positioning analysis.
+
+## CRITICAL CONSTRAINTS - YOU MUST FOLLOW THESE:
+
+1. **NEVER fabricate investment relationships.** Only reference companies explicitly listed in the Portfolio Companies section above. Do NOT claim the investor backed companies not in the list.
+
+2. **NEVER claim the investor backed the user's company** unless explicitly stated in the company briefing that this investor has already invested.
+
+3. **For "Opening Hook" and all recommendations** - use ONLY verifiable facts from the provided investor data above. Do not invent quotes, specific dollar amounts, or investment details not provided.
+
+4. **For "Portfolio Analogies"** - ONLY use companies from the Portfolio Companies list above. Do not reference companies the investor did not invest in.
+
+5. **Do NOT invent specific investment amounts, valuations, or exit values** unless they are explicitly provided in the investor data above.
+
+6. **When uncertain about a fact**, phrase it as a question or suggestion rather than a definitive statement.
 
 Return your analysis as a JSON object with this exact structure:
 
@@ -483,10 +580,14 @@ export default async function handler(req, res) {
       });
     }
 
-    // Store the analysis in KV
+    // Perform basic verification of the generated analysis
+    const verification = performBasicVerification(analysis, investor);
+
+    // Store the analysis in KV with verification metadata
     const updatedBriefing = {
       ...briefing,
       positioningAnalysis: analysis,
+      verification,
       analyzedAt: new Date().toISOString()
     };
 
@@ -497,7 +598,8 @@ export default async function handler(req, res) {
       briefingId: actualBriefingId,
       companyName: briefing.companyName,
       investorName: investor.name,
-      analysis
+      analysis,
+      verification
     });
 
   } catch (error) {

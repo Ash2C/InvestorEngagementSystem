@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Return briefing metadata and analysis (without the full extracted text)
+    // Return briefing metadata, analysis, and verification (without the full extracted text)
     return res.status(200).json({
       success: true,
       hasBriefing: true,
@@ -60,7 +60,8 @@ export default async function handler(req, res) {
         analyzedAt: briefing.analyzedAt || null,
         hasAnalysis: !!briefing.positioningAnalysis
       },
-      analysis: briefing.positioningAnalysis || null
+      analysis: briefing.positioningAnalysis || null,
+      verification: briefing.verification || null
     });
 
   } catch (error) {
