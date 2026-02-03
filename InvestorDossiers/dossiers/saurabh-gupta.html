@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saurabh Gupta - Investor Dossier</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .dossier {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            padding: 48px;
+        }
+
+        /* Profile Header */
+        .profile-header {
+            display: flex;
+            gap: 24px;
+            padding-bottom: 32px;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 40px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 2rem; font-weight: 700; margin-bottom: 4px; color: var(--gray-900); }
+        .profile-role { font-size: 1.1rem; color: var(--gray-600); margin-bottom: 16px; }
+
+        .profile-links { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .profile-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--gray-800);
+            text-decoration: none;
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+
+        .profile-link:hover { background: var(--gray-200); color: var(--primary); }
+        .profile-link svg { width: 16px; height: 16px; }
+
+        .profile-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 12px;
+        }
+
+        .meta-item { text-align: center; }
+        .meta-label { font-size: 0.75rem; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .meta-value { font-size: 1rem; font-weight: 600; color: var(--gray-900); }
+
+        /* Content Styles */
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 48px;
+            margin-bottom: 20px;
+            color: var(--gray-900);
+            border-bottom: 2px solid var(--gray-200);
+            padding-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            color: var(--gray-800);
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            color: var(--gray-700);
+        }
+
+        p { margin-bottom: 16px; }
+
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        ul, ol { margin-bottom: 16px; padding-left: 24px; }
+        li { margin-bottom: 8px; }
+
+        blockquote {
+            border-left: 4px solid var(--primary);
+            margin: 24px 0;
+            padding: 16px 24px;
+            background: #eff6ff;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+        }
+
+        blockquote p { margin-bottom: 0; }
+        blockquote cite { display: block; margin-top: 8px; font-style: normal; font-size: 0.9rem; color: var(--gray-600); }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border: 1px solid var(--gray-200);
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        th { background: var(--gray-50); font-weight: 600; color: var(--gray-900); }
+        tr:hover { background: var(--gray-50); }
+
+        strong { font-weight: 600; }
+        em { font-style: italic; }
+
+        .checklist { list-style: none; padding-left: 0; }
+        .checklist li { padding-left: 28px; position: relative; }
+        .checklist li::before { content: "☐"; position: absolute; left: 0; color: var(--gray-600); }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--gray-100);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .section-intro {
+            font-size: 1.05rem;
+            color: var(--gray-600);
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        @media print {
+            body { background: white; }
+            .container { padding: 0; }
+            .dossier { box-shadow: none; padding: 24px; }
+            a { color: var(--primary); text-decoration: underline; }
+            h2 { page-break-after: avoid; }
+            table, blockquote { page-break-inside: avoid; }
+        }
+
+        @media (max-width: 640px) {
+            .profile-header { flex-direction: column; text-align: center; }
+            .profile-links { justify-content: center; }
+            .profile-meta { grid-template-columns: 1fr; }
+            .dossier { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dossier">
+            <!-- Profile Header -->
+            <header class="profile-header">
+                <div class="profile-avatar">SG</div>
+                <div class="profile-info">
+                    <h1 class="profile-name">Saurabh Gupta</h1>
+                    <p class="profile-role">Co-Founder & Managing Partner · DST Global</p>
+                    <div class="profile-links">
+                        <a href="https://www.linkedin.com/in/saurabh-gupta-1a54b15/" target="_blank" class="profile-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                            LinkedIn
+                        </a>
+                        <a href="https://dst-global.com/" target="_blank" class="profile-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                            DST Global
+                        </a>
+                        <a href="https://www.crunchbase.com/person/saurabh-gupta" target="_blank" class="profile-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            Crunchbase
+                        </a>
+                        <a href="https://signal.nfx.com/investors/saurabh-gupta_1" target="_blank" class="profile-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            Signal
+                        </a>
+                    </div>
+                    <div class="profile-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Investment Focus</div>
+                            <div class="meta-value">Consumer · Enterprise · AI</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Stage</div>
+                            <div class="meta-value">Series B → Growth</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Check Size</div>
+                            <div class="meta-value">$15M – $200M</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Background -->
+            <h2>Background</h2>
+            <p><a href="https://www.linkedin.com/in/saurabh-gupta-1a54b15/">Saurabh Gupta</a> is a Co-Founder and Managing Partner at <a href="https://dst-global.com/">DST Global</a>, one of the world's largest and most influential venture capital firms with approximately $50 billion in assets under management. He co-founded the firm in 2009 alongside Yuri Milner, John Lindfors, Rahul Mehta, and Tom Stafford.</p>
+
+            <h3>Career Highlights</h3>
+            <ul>
+                <li><strong><a href="https://dst-global.com/">DST Global</a></strong>: Co-Founder & Managing Partner since 2009, helping build one of the most successful late-stage investment firms globally</li>
+                <li><strong><a href="https://www.jpmorgan.com/">JPMorgan</a></strong>: Investment banking advisory background</li>
+                <li><strong>Phonethics Mobile Media</strong>: CEO & Founder — entrepreneurial experience before VC</li>
+                <li><strong>Education</strong>: <a href="https://www.mdi.ac.in/">Management Development Institute (MDI)</a> (2004-2006)</li>
+            </ul>
+
+            <h3>What Makes Him Unique</h3>
+            <p>Gupta combines investment banking rigor with entrepreneurial experience and a uniquely global perspective. He has been instrumental in DST's emerging markets strategy, with deep expertise in India and Latin America. He currently serves as board observer at <a href="https://www.brex.com/">Brex</a>, <a href="https://www.swiggy.com/">Swiggy</a>, <a href="https://udaan.com/">Udaan</a>, <a href="https://www.rappi.com/">Rappi</a>, and led DST's investment in <a href="https://www.airbnb.com/">Airbnb</a>. His low-profile, relationship-driven approach has made DST the partner of choice for founders who want capital without interference.</p>
+
+            <!-- Investment Thesis -->
+            <h2>Investment Thesis & Key Ideas</h2>
+
+            <h3>Core Philosophy</h3>
+            <p><em>"Invest in category-defining companies with founder-friendly terms"</em> — DST takes concentrated positions in late-stage growth companies that are already winning their markets, providing capital without taking board seats.</p>
+
+            <h3>Key Concepts DST Has Pioneered</h3>
+
+            <h4>1. "Founder-Friendly Terms"</h4>
+            <p>When DST negotiated the Facebook and Twitter deals, they asked for no board seats and assigned all votes to founders, figuring founders knew best how to run their companies. This was revolutionary at the time and is now core to DST's philosophy.</p>
+            <blockquote>
+                <p>"When we negotiated the Facebook and Twitter deals we asked for no board seats, and assigned all our votes to their founders, figuring they knew best how to run their companies."</p>
+                <cite>— Yuri Milner, DST Global Founder</cite>
+            </blockquote>
+
+            <h4>2. "Category Leaders, Not Early Bets"</h4>
+            <p>DST doesn't try to pick winners early — they invest when companies have already demonstrated category leadership. This means proven traction, clear market dominance, and validated unit economics.</p>
+
+            <h4>3. "Global Arbitrage"</h4>
+            <p>DST identifies winning models across geographies — backing <a href="https://nubank.com.br/">Nubank</a> in Latin America, <a href="https://www.swiggy.com/">Swiggy</a> and <a href="https://udaan.com/">Udaan</a> in India, and ByteDance in China. They understand that category-defining companies emerge globally.</p>
+
+            <h4>4. "Concentrated Positions"</h4>
+            <p>With check sizes ranging from $15M to $200M (sweet spot: $25M), DST takes meaningful positions in fewer companies rather than spreading capital thin.</p>
+
+            <!-- Portfolio -->
+            <h2>Portfolio Pattern Recognition</h2>
+
+            <h3>What ALL DST Investments Share</h3>
+            <table>
+                <thead>
+                    <tr><th>Pattern</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Market leader</td><td>Already winning their category, not fighting for position</td></tr>
+                    <tr><td>Network effects</td><td>Marketplace dynamics that compound over time</td></tr>
+                    <tr><td>Proven economics</td><td>Unit economics validated at scale</td></tr>
+                    <tr><td>Massive TAM</td><td>$10B+ addressable markets</td></tr>
+                    <tr><td>Exceptional founders</td><td>Visionary leaders who want to stay in control</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Recent AI Investments</h3>
+            <table>
+                <thead>
+                    <tr><th>Investment</th><th>What It Does</th><th>Stage</th><th>Valuation</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><a href="https://ssi.inc/">Safe Superintelligence</a></td><td>Ilya Sutskever's AI safety lab</td><td>Seed</td><td>$5B → $32B</td></tr>
+                    <tr><td><a href="https://mistral.ai/">Mistral AI</a></td><td>European foundation models</td><td>Series B</td><td>$5.8B</td></tr>
+                    <tr><td><a href="https://www.poolside.ai/">Poolside</a></td><td>AI for software development</td><td>Series B</td><td>$3B</td></tr>
+                    <tr><td><a href="https://www.harvey.ai/">Harvey</a></td><td>AI for legal professionals</td><td>Series C/E</td><td>—</td></tr>
+                    <tr><td><a href="https://anysphere.inc/">Anysphere</a></td><td>Cursor AI coding assistant</td><td>Growth</td><td>—</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Classic DST Portfolio</h3>
+            <table>
+                <thead>
+                    <tr><th>Investment</th><th>What It Does</th><th>Outcome</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><a href="https://www.facebook.com/">Facebook</a></td><td>Social networking</td><td>IPO 2012</td></tr>
+                    <tr><td><a href="https://x.com/">Twitter</a></td><td>Social media</td><td>$400M at $8B (2011)</td></tr>
+                    <tr><td><a href="https://www.whatsapp.com/">WhatsApp</a></td><td>Messaging</td><td>Acquired $19B</td></tr>
+                    <tr><td><a href="https://www.spotify.com/">Spotify</a></td><td>Music streaming</td><td>IPO 2018</td></tr>
+                    <tr><td><a href="https://www.alibaba.com/">Alibaba</a></td><td>E-commerce</td><td>IPO 2014</td></tr>
+                    <tr><td><a href="https://www.airbnb.com/">Airbnb</a></td><td>Accommodation</td><td>IPO 2020</td></tr>
+                    <tr><td><a href="https://nubank.com.br/">Nubank</a></td><td>Digital banking</td><td>IPO 2021</td></tr>
+                    <tr><td><a href="https://www.klarna.com/">Klarna</a></td><td>Buy now, pay later</td><td>NYSE listed</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Gupta's Board Observer Roles</h3>
+            <table>
+                <thead>
+                    <tr><th>Company</th><th>Sector</th><th>Region</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><a href="https://www.brex.com/">Brex</a></td><td>FinTech — Corporate cards</td><td>US</td></tr>
+                    <tr><td><a href="https://www.swiggy.com/">Swiggy</a></td><td>Food delivery</td><td>India</td></tr>
+                    <tr><td><a href="https://udaan.com/">Udaan</a></td><td>B2B e-commerce</td><td>India</td></tr>
+                    <tr><td><a href="https://www.rappi.com/">Rappi</a></td><td>Super app</td><td>Latin America</td></tr>
+                </tbody>
+            </table>
+
+            <!-- Recent Activity -->
+            <h2>Recent Activity (2024-2025)</h2>
+
+            <h3>Investment Activity</h3>
+            <p>DST Global made 28 investments in 2025, with significant focus on AI:</p>
+            <ul>
+                <li><strong><a href="https://ssi.inc/">Safe Superintelligence</a></strong> — $1B seed at $5B valuation (September 2024)</li>
+                <li><strong><a href="https://mistral.ai/">Mistral AI</a></strong> — $600M Series B at $5.8B (June 2024)</li>
+                <li><strong><a href="https://www.poolside.ai/">Poolside</a></strong> — $500M Series B at $3B (October 2024)</li>
+                <li><strong><a href="https://anysphere.inc/">Anysphere</a></strong> — $900M round with a16z (December 2025)</li>
+                <li><strong><a href="https://www.harvey.ai/">Harvey</a></strong> — Multiple rounds, now 1000+ customers globally</li>
+            </ul>
+
+            <h3>Speaking Engagements</h3>
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Event</th><th>Topic</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Nov 2025</td><td><a href="https://becocapital.com/fireside-chat-the-future-of-ai-investment-with-dst-global-s-saurabh-gupta/">BECO Capital AGM Fireside Chat</a></td><td>The Future of AI Investment</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Current Focus:</strong> Heavily investing in AI infrastructure and applications — foundation models, AI-native applications, and vertical AI solutions.</p>
+
+            <!-- Positioning -->
+            <h2>How to Position for This Investor</h2>
+
+            <h3>The Framework</h3>
+            <p>Position as a <strong>category leader</strong> with <strong>proven traction</strong>, not an early-stage bet. DST invests in winners.</p>
+            <p>Key positioning elements:</p>
+            <ul>
+                <li>Market leadership metrics (share, growth rate vs. competitors)</li>
+                <li>Network effects or marketplace dynamics</li>
+                <li>Validated unit economics at scale</li>
+                <li>Clear path to $1B+ revenue</li>
+                <li>Founder-led with long-term vision</li>
+            </ul>
+
+            <h3>One-Liner Template</h3>
+            <blockquote>
+                <p>"We're the [category leader] in [market] with [traction metrics], and we're looking for a partner who will support our long-term vision without requiring board control — exactly what DST provided to <a href="https://www.airbnb.com/">Airbnb</a>/<a href="https://nubank.com.br/">Nubank</a>/similar."</p>
+            </blockquote>
+
+            <h3>Why This Framework Works</h3>
+            <ol>
+                <li><strong>Category Leader</strong> — DST backs winners, not hopefuls</li>
+                <li><strong>Proven Metrics</strong> — They invest post-product-market-fit</li>
+                <li><strong>Founder-Friendly Framing</strong> — Aligns with their core philosophy</li>
+                <li><strong>Portfolio References</strong> — Shows you understand their approach</li>
+            </ol>
+
+            <!-- Portfolio Analogies -->
+            <h2>Key Portfolio Analogies to Use in Conversation</h2>
+
+            <p><strong>When discussing market leadership:</strong></p>
+            <blockquote>
+                <p>"Similar to how <a href="https://www.swiggy.com/">Swiggy</a> became the category leader in Indian food delivery, we've established dominant position in [market] with [X% market share]."</p>
+            </blockquote>
+
+            <p><strong>When discussing network effects:</strong></p>
+            <blockquote>
+                <p>"Like <a href="https://www.airbnb.com/">Airbnb</a>, our marketplace dynamics create compounding advantages — more [supply] attracts more [demand], which attracts more [supply]."</p>
+            </blockquote>
+
+            <p><strong>When discussing global expansion:</strong></p>
+            <blockquote>
+                <p>"We see the same playbook that worked for <a href="https://nubank.com.br/">Nubank</a> in Latin America — a massive underserved market ready for a digital-first solution."</p>
+            </blockquote>
+
+            <p><strong>When discussing AI applications:</strong></p>
+            <blockquote>
+                <p>"Similar to how <a href="https://www.harvey.ai/">Harvey</a> is transforming legal work, we're applying AI to [vertical] where the ROI is clear and measurable."</p>
+            </blockquote>
+
+            <!-- Q&A -->
+            <h2>Anticipated Questions & Counters</h2>
+
+            <h3>Q1: "What's your market position vs. competitors?"</h3>
+            <p><strong>Counter:</strong> "We're the clear category leader with [X% market share], growing [Y%] faster than the next competitor. Our network effects are compounding — [specific metrics showing marketplace dynamics]. This is a winner-take-most market, and we're winning."</p>
+
+            <h3>Q2: "What are your unit economics at scale?"</h3>
+            <p><strong>Counter:</strong> "Our unit economics have improved [X%] over the last [period] as we've scaled. [Specific metrics: CAC, LTV, payback period, contribution margin]. We've proven the model works — now it's about scaling it."</p>
+
+            <h3>Q3: "What's the path to $1B+ in revenue?"</h3>
+            <p><strong>Counter:</strong> "Our TAM is [$X billion], and we're currently at [Y% penetration]. We see three expansion vectors: [geographic expansion], [product expansion], [market segment expansion]. Similar to how <a href="https://www.airbnb.com/">Airbnb</a> or <a href="https://nubank.com.br/">Nubank</a> achieved this scale."</p>
+
+            <h3>Q4: "Why raise from DST specifically?"</h3>
+            <p><strong>Counter:</strong> "We want a partner who has seen hypergrowth before and understands that founders should stay in control. Your approach with <a href="https://www.airbnb.com/">Airbnb</a>/Facebook — large check, no board seat, long-term orientation — is exactly what we're looking for. We don't need operational help; we need patient capital and a partner who trusts founders."</p>
+
+            <h3>Q5: "How do you think about the AI opportunity?"</h3>
+            <p><strong>Counter:</strong> "Given your recent investments in <a href="https://ssi.inc/">Safe Superintelligence</a>, <a href="https://mistral.ai/">Mistral</a>, and <a href="https://www.harvey.ai/">Harvey</a>, you clearly see AI as a transformative platform shift. We're positioned at [specific layer/application] where we're seeing [traction metrics]. This is a category-defining opportunity."</p>
+
+            <!-- Meeting Prep -->
+            <h2>Meeting Prep Checklist</h2>
+
+            <h3>Market Leadership</h3>
+            <ul class="checklist">
+                <li>Market share vs. top 3 competitors</li>
+                <li>Growth rate comparison</li>
+                <li>Network effect metrics (if applicable)</li>
+                <li>Customer/user retention data</li>
+                <li>Brand/NPS metrics</li>
+            </ul>
+
+            <h3>Unit Economics</h3>
+            <ul class="checklist">
+                <li>CAC by channel, trending over time</li>
+                <li>LTV and LTV/CAC ratio</li>
+                <li>Contribution margin at scale</li>
+                <li>Path to profitability timeline</li>
+                <li>Cohort analysis showing improving economics</li>
+            </ul>
+
+            <h3>Scale & Trajectory</h3>
+            <ul class="checklist">
+                <li>Revenue growth (last 12-24 months)</li>
+                <li>Path to $100M, $500M, $1B revenue</li>
+                <li>TAM sizing with bottoms-up analysis</li>
+                <li>Geographic/product expansion roadmap</li>
+            </ul>
+
+            <h3>The Ask</h3>
+            <ul class="checklist">
+                <li>Clear use of funds at DST check sizes ($25M+ sweet spot)</li>
+                <li>Milestones this capital achieves</li>
+                <li>Why DST specifically vs. other growth investors</li>
+                <li>Founder-friendly terms you're seeking</li>
+            </ul>
+
+            <h3>DST-Specific Prep</h3>
+            <ul class="checklist">
+                <li>Know their relevant portfolio companies</li>
+                <li>Understand their India/LatAm investments if applicable</li>
+                <li>Research recent AI investments if relevant</li>
+                <li>Be prepared to discuss long-term founder vision</li>
+            </ul>
+
+            <!-- Contact -->
+            <h2>Contact & Links</h2>
+            <table>
+                <tbody>
+                    <tr><td><strong>LinkedIn</strong></td><td><a href="https://www.linkedin.com/in/saurabh-gupta-1a54b15/">linkedin.com/in/saurabh-gupta-1a54b15/</a></td></tr>
+                    <tr><td><strong>Firm Website</strong></td><td><a href="https://dst-global.com/">dst-global.com</a></td></tr>
+                    <tr><td><strong>Firm Email</strong></td><td><a href="mailto:info@dst-global.com">info@dst-global.com</a></td></tr>
+                    <tr><td><strong>Crunchbase</strong></td><td><a href="https://www.crunchbase.com/person/saurabh-gupta">crunchbase.com/person/saurabh-gupta</a></td></tr>
+                    <tr><td><strong>Signal Profile</strong></td><td><a href="https://signal.nfx.com/investors/saurabh-gupta_1">signal.nfx.com/investors/saurabh-gupta_1</a></td></tr>
+                </tbody>
+            </table>
+
+            <!-- Sources -->
+            <h2>Research Sources</h2>
+            <ul>
+                <li><a href="https://signal.nfx.com/investors/saurabh-gupta_1">NFX Signal — Saurabh Gupta Profile</a></li>
+                <li><a href="https://www.crunchbase.com/person/saurabh-gupta">Crunchbase — Saurabh Gupta</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/DST_Global">DST Global Wikipedia</a></li>
+                <li><a href="https://becocapital.com/fireside-chat-the-future-of-ai-investment-with-dst-global-s-saurabh-gupta/">BECO Capital Fireside Chat</a></li>
+                <li><a href="https://tracxn.com/d/venture-capital/dst-global/__9mTBqRmKSkZg8xVhcwtufbL9L5mIfCFG4yg5KuVaD5Q">Tracxn — DST Global Portfolio</a></li>
+                <li><a href="https://www.baybrazil.org/saurabh-gupta-dst-global">BayBrazil — Saurabh Gupta Profile</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

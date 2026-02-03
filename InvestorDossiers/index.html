@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Dossiers</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sidebar-width: 280px;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--gray-900);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h1 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar h1::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.8rem;
+            color: var(--gray-300);
+            margin-bottom: 24px;
+        }
+
+        .dossier-list {
+            list-style: none;
+            flex: 1;
+        }
+
+        .dossier-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dossier-item:hover { background: rgba(255,255,255,0.1); }
+        .dossier-item.active { background: var(--primary); }
+
+        .dossier-item .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .dossier-item .info { flex: 1; min-width: 0; }
+        .dossier-item .name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dossier-item .firm { font-size: 0.75rem; color: var(--gray-300); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .drop-zone-sidebar {
+            border: 2px dashed var(--gray-600);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 16px;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            color: var(--gray-300);
+        }
+
+        .drop-zone-sidebar.dragover { border-color: var(--primary); background: rgba(37, 99, 235, 0.1); }
+        .drop-zone-sidebar input { display: none; }
+
+        .btn-add {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: 1px solid var(--gray-600);
+            color: var(--gray-300);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            transition: all 0.15s;
+        }
+
+        .btn-add:hover { background: rgba(255,255,255,0.05); border-color: var(--gray-300); }
+
+        /* Main content */
+        .main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .toolbar-title { flex: 1; font-weight: 600; font-size: 1.1rem; }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: white; color: var(--gray-800); border: 1px solid var(--gray-300); }
+        .btn-secondary:hover { background: var(--gray-50); }
+        .btn svg { width: 16px; height: 16px; }
+
+        .content-wrapper { flex: 1; padding: 24px; overflow-y: auto; }
+
+        #content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 40px 48px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Profile Header Card */
+        .profile-header {
+            display: flex;
+            gap: 24px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 32px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 1.75rem; font-weight: 700; margin-bottom: 4px; }
+        .profile-role { font-size: 1rem; color: var(--gray-600); margin-bottom: 12px; }
+
+        .profile-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .profile-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--gray-100);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--gray-800);
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .profile-link:hover { background: var(--gray-200); color: var(--primary); }
+        .profile-link svg { width: 14px; height: 14px; }
+
+        .profile-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .meta-item { }
+        .meta-label { font-size: 0.75rem; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .meta-value { font-size: 0.9rem; font-weight: 500; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 80px 40px; color: var(--gray-600); }
+        .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state h2 { font-size: 1.25rem; margin-bottom: 8px; color: var(--gray-800); }
+
+        /* Markdown content styles */
+        #content h1 { font-size: 1.5rem; margin-top: 32px; margin-bottom: 16px; color: var(--gray-900); border-bottom: 1px solid var(--gray-200); padding-bottom: 8px; }
+        #content h1:first-child { display: none; } /* Hide the main title since we show profile card */
+        #content h2 { font-size: 1.25rem; margin-top: 32px; margin-bottom: 12px; color: var(--gray-900); border-bottom: 1px solid var(--gray-200); padding-bottom: 8px; }
+        #content h3 { font-size: 1.1rem; margin-top: 24px; margin-bottom: 10px; color: var(--gray-800); }
+        #content h4 { font-size: 1rem; margin-top: 20px; margin-bottom: 8px; color: var(--gray-600); }
+        #content p { margin-bottom: 12px; line-height: 1.7; }
+        #content a { color: var(--primary); text-decoration: none; }
+        #content a:hover { text-decoration: underline; }
+        #content ul, #content ol { margin-bottom: 12px; padding-left: 24px; }
+        #content li { margin-bottom: 4px; line-height: 1.6; }
+
+        #content blockquote {
+            border-left: 4px solid var(--primary);
+            margin: 16px 0;
+            padding: 12px 16px;
+            background: #eff6ff;
+            border-radius: 0 8px 8px 0;
+        }
+        #content blockquote p { margin-bottom: 0; font-style: italic; }
+
+        #content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+            font-size: 0.85rem;
+        }
+        #content th, #content td {
+            border: 1px solid var(--gray-200);
+            padding: 8px 12px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        #content th { background: var(--gray-50); font-weight: 600; }
+        #content tr:hover { background: var(--gray-50); }
+
+        #content code { background: var(--gray-100); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+        #content pre { background: var(--gray-900); color: #f8f8f2; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 16px 0; }
+        #content pre code { background: none; color: inherit; padding: 0; }
+        #content strong { font-weight: 600; }
+        #content hr { border: none; border-top: 1px solid var(--gray-200); margin: 24px 0; }
+
+        /* Print / PDF styles */
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { background: white !important; }
+            .sidebar, .toolbar { display: none !important; }
+            .main { margin-left: 0 !important; }
+            .content-wrapper { padding: 0 !important; }
+
+            #content {
+                box-shadow: none !important;
+                padding: 20px !important;
+                max-width: 100% !important;
+                border-radius: 0 !important;
+            }
+
+            .profile-header { page-break-inside: avoid; }
+            #content h1, #content h2, #content h3 { page-break-after: avoid; }
+            #content table { page-break-inside: auto; }
+            #content tr { page-break-inside: avoid; }
+            #content blockquote { page-break-inside: avoid; }
+
+            #content a { color: var(--primary) !important; text-decoration: underline !important; }
+            #content a[href^="http"]::after { content: none !important; }
+        }
+
+        /* PDF-specific wrapper */
+        .pdf-content {
+            font-size: 11pt;
+            line-height: 1.5;
+        }
+
+        .pdf-content table {
+            font-size: 9pt;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .pdf-content th, .pdf-content td {
+            padding: 6px 8px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .pdf-content h1 { font-size: 16pt; }
+        .pdf-content h2 { font-size: 14pt; page-break-after: avoid; }
+        .pdf-content h3 { font-size: 12pt; page-break-after: avoid; }
+
+        .pdf-content .profile-header {
+            page-break-inside: avoid;
+            margin-bottom: 20px;
+        }
+
+        .pdf-content blockquote {
+            page-break-inside: avoid;
+        }
+
+        .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--gray-600); }
+        .spinner { width: 20px; height: 20px; border: 2px solid var(--gray-200); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h1>Investor Dossiers</h1>
+        <p class="sidebar-subtitle">Engagement Intelligence</p>
+        <ul class="dossier-list" id="dossierList"></ul>
+        <div class="drop-zone-sidebar" id="dropZone">
+            <p>Drop .md files here</p>
+            <input type="file" id="fileInput" accept=".md" multiple>
+            <button class="btn-add" onclick="document.getElementById('fileInput').click()">+ Add Dossier</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="toolbar" id="toolbar" style="display: none;">
+            <span class="toolbar-title" id="toolbarTitle">Investor Dossier</span>
+            <button class="btn btn-secondary" onclick="printPDF()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print / Save PDF
+            </button>
+            <button class="btn btn-primary" onclick="downloadPDF()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download PDF
+            </button>
+        </div>
+
+        <div class="content-wrapper">
+            <div id="content">
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <h2>No Dossier Selected</h2>
+                    <p>Select a dossier from the sidebar or drop a .md file to view it</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let dossiers = [];
+        let currentDossier = null;
+
+        // Full YAML parser for nested structures
+        function parseYamlFull(yamlStr) {
+            const result = {};
+            const lines = yamlStr.split('\n');
+
+            let currentKey = null;
+            let currentArray = null;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const trimmed = line.trim();
+
+                if (!trimmed || trimmed.startsWith('#')) continue;
+
+                // Top-level key with value
+                const simpleMatch = line.match(/^([a-z_]+):\s*"?([^"]*)"?\s*$/i);
+                if (simpleMatch && !line.startsWith(' ') && !line.startsWith('\t')) {
+                    const [, key, value] = simpleMatch;
+                    if (value) {
+                        result[key] = value.replace(/^["']|["']$/g, '');
+                    }
+                    currentKey = key;
+                }
+            }
+
+            return result;
+        }
+
+        // Extract metadata from YAML
+        function extractMetadata(content) {
+            const yamlMatch = content.match(/^---\n([\s\S]*?)\n---/);
+            if (yamlMatch) {
+                const yaml = parseYamlFull(yamlMatch[1]);
+                return {
+                    name: yaml.name || 'Unknown',
+                    firm: yaml.firm || '',
+                    role: yaml.role || '',
+                    team: yaml.team || '',
+                    email: yaml.email || '',
+                    linkedin: yaml.linkedin || '',
+                    twitter: yaml.twitter || '',
+                    github: yaml.github || '',
+                    portfolio_url: yaml.portfolio_url || '',
+                    status: yaml.status || 'draft',
+                    prepared_for: yaml.prepared_for || ''
+                };
+            }
+
+            const h1Match = content.match(/^#\s+(.+)/m);
+            return {
+                name: h1Match ? h1Match[1].replace(' - Executive Briefing', '') : 'Unknown',
+                firm: '', role: '', team: '', email: '', linkedin: '', twitter: '', github: '', portfolio_url: '', status: 'draft', prepared_for: ''
+            };
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function renderDossierList() {
+            const list = document.getElementById('dossierList');
+            list.innerHTML = dossiers.map((d, i) => `
+                <li class="dossier-item ${currentDossier === i ? 'active' : ''}" onclick="selectDossier(${i})">
+                    <div class="avatar">${getInitials(d.metadata.name)}</div>
+                    <div class="info">
+                        <div class="name">${d.metadata.name}</div>
+                        <div class="firm">${d.metadata.firm || 'No firm'}</div>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        function selectDossier(index) {
+            currentDossier = index;
+            renderDossierList();
+            renderContent();
+            document.getElementById('toolbar').style.display = 'flex';
+            document.getElementById('toolbarTitle').textContent = dossiers[index].metadata.name;
+        }
+
+        function buildProfileHeader(meta) {
+            const links = [];
+
+            if (meta.email) {
+                links.push(`<a href="mailto:${meta.email}" class="profile-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    Email</a>`);
+            }
+            if (meta.linkedin) {
+                links.push(`<a href="${meta.linkedin}" target="_blank" class="profile-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    LinkedIn</a>`);
+            }
+            if (meta.twitter) {
+                links.push(`<a href="${meta.twitter}" target="_blank" class="profile-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    Twitter</a>`);
+            }
+            if (meta.github) {
+                links.push(`<a href="${meta.github}" target="_blank" class="profile-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub</a>`);
+            }
+            if (meta.portfolio_url) {
+                links.push(`<a href="${meta.portfolio_url}" target="_blank" class="profile-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                    Portfolio</a>`);
+            }
+
+            const role = [meta.role, meta.team, meta.firm].filter(Boolean).join(' · ');
+
+            return `
+                <div class="profile-header">
+                    <div class="profile-avatar">${getInitials(meta.name)}</div>
+                    <div class="profile-info">
+                        <div class="profile-name">${meta.name}</div>
+                        <div class="profile-role">${role}</div>
+                        ${links.length ? `<div class="profile-links">${links.join('')}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderContent() {
+            if (currentDossier === null) return;
+
+            const dossier = dossiers[currentDossier];
+            let content = dossier.content;
+
+            // Remove YAML frontmatter
+            content = content.replace(/^---\n[\s\S]*?\n---\n/, '');
+
+            // Build clean HTML
+            const profileHeader = buildProfileHeader(dossier.metadata);
+            const markdownHtml = marked.parse(content);
+
+            document.getElementById('content').innerHTML = profileHeader + markdownHtml;
+        }
+
+        function printPDF() {
+            window.print();
+        }
+
+        function downloadPDF() {
+            if (currentDossier === null) return;
+
+            const content = document.getElementById('content');
+            const name = dossiers[currentDossier].metadata.name.replace(/\s+/g, '-');
+
+            // Create a clone for PDF generation with adjusted styles
+            const clone = content.cloneNode(true);
+            clone.classList.add('pdf-content');
+
+            // Temporarily append to body for PDF generation
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'absolute';
+            wrapper.style.left = '-9999px';
+            wrapper.style.width = '210mm'; // A4 width
+            wrapper.appendChild(clone);
+            document.body.appendChild(wrapper);
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Generating...';
+            btn.disabled = true;
+
+            const opt = {
+                margin: [15, 15, 15, 15],
+                filename: `${name}-Dossier.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true,
+                    width: 595, // A4 width in pixels at 72dpi
+                    windowWidth: 800
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: {
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    before: '.page-break-before',
+                    after: '.page-break-after',
+                    avoid: ['tr', 'blockquote', '.profile-header', 'h1', 'h2', 'h3']
+                }
+            };
+
+            html2pdf().set(opt).from(clone).save().then(() => {
+                document.body.removeChild(wrapper);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error(err);
+                document.body.removeChild(wrapper);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('PDF generation failed. Try using "Print / Save PDF" instead.');
+            });
+        }
+
+        function loadFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const metadata = extractMetadata(content);
+
+                const existing = dossiers.findIndex(d => d.metadata.name === metadata.name);
+                if (existing >= 0) {
+                    dossiers[existing] = { content, metadata, filename: file.name };
+                    selectDossier(existing);
+                } else {
+                    dossiers.push({ content, metadata, filename: file.name });
+                    selectDossier(dossiers.length - 1);
+                }
+
+                renderDossierList();
+            };
+            reader.readAsText(file);
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            Array.from(e.target.files).forEach(loadFile);
+        });
+
+        const dropZone = document.getElementById('dropZone');
+
+        document.body.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        document.body.addEventListener('dragleave', function(e) {
+            if (!e.relatedTarget || !document.body.contains(e.relatedTarget)) {
+                dropZone.classList.remove('dragover');
+            }
+        });
+
+        document.body.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.md')).forEach(loadFile);
+        });
+    </script>
+</body>
+</html>
