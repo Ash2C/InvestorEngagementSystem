@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investor Dossier Platform</title>
+    <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
         * {
             margin: 0;
@@ -28,10 +29,10 @@
             padding: 48px;
             width: 100%;
             max-width: 420px;
+            text-align: center;
         }
 
         .logo {
-            text-align: center;
             margin-bottom: 32px;
         }
 
@@ -44,61 +45,6 @@
         .logo p {
             color: #666;
             font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #4a6cf7;
-            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 14px 24px;
-            background: linear-gradient(135deg, #4a6cf7 0%, #6366f1 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 20px rgba(74, 108, 247, 0.4);
-        }
-
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
-        .btn-login:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
         }
 
         .error-message {
@@ -116,24 +62,49 @@
             display: block;
         }
 
-        .loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #ffffff;
+        #googleSignInContainer {
+            display: flex;
+            justify-content: center;
+            min-height: 44px;
+        }
+
+        .loading-signin {
+            color: #666;
+            font-size: 14px;
+            padding: 12px 0;
+        }
+
+        .signing-in-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 0;
+        }
+
+        .signing-in-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e0e0e0;
             border-radius: 50%;
-            border-top-color: transparent;
+            border-top-color: #4a6cf7;
             animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
+        .signing-in-overlay span {
+            color: #666;
+            font-size: 14px;
+        }
+
         .footer-note {
-            text-align: center;
             margin-top: 24px;
             font-size: 12px;
             color: #999;
@@ -144,81 +115,112 @@
     <div class="login-container">
         <div class="logo">
             <h1>Investor Dossier Platform</h1>
-            <p>Sign in to access your investor dossiers</p>
+            <p>Sign in with your Google account to access your investor dossiers</p>
         </div>
 
         <div id="errorMessage" class="error-message"></div>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="token">Access Token</label>
-                <input
-                    type="text"
-                    id="token"
-                    name="token"
-                    placeholder="Enter your access token"
-                    required
-                    autocomplete="off"
-                    spellcheck="false"
-                >
-            </div>
+        <div id="googleSignInContainer">
+            <div class="loading-signin">Loading sign-in...</div>
+        </div>
 
-            <button type="submit" id="loginBtn" class="btn-login">
-                Sign In
-            </button>
-        </form>
+        <div id="signingInOverlay" class="signing-in-overlay">
+            <div class="spinner"></div>
+            <span>Signing you in...</span>
+        </div>
 
         <p class="footer-note">
-            Enter the access token provided by your administrator.
+            Your administrator will set up your account with your Google email address.
         </p>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        const errorMessage = document.getElementById('errorMessage');
+        const googleSignInContainer = document.getElementById('googleSignInContainer');
+        const signingInOverlay = document.getElementById('signingInOverlay');
 
-            const token = document.getElementById('token').value.trim();
-            const loginBtn = document.getElementById('loginBtn');
-            const errorMessage = document.getElementById('errorMessage');
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
 
-            // Hide any previous error
+        function hideError() {
             errorMessage.classList.remove('show');
+        }
 
-            if (!token) {
-                errorMessage.textContent = 'Please enter your access token.';
-                errorMessage.classList.add('show');
-                return;
-            }
-
-            // Show loading state
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = '<span class="loading"></span>Validating...';
+        async function handleCredentialResponse(response) {
+            hideError();
+            // Hide the Google button and show signing-in state
+            googleSignInContainer.style.display = 'none';
+            signingInOverlay.classList.add('show');
 
             try {
-                const response = await fetch(`/api/auth/validate-token?token=${encodeURIComponent(token)}`);
-                const data = await response.json();
+                const res = await fetch('/api/auth/google-signin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential }),
+                });
 
-                if (response.ok && data.valid) {
-                    // Redirect to portal with token
-                    window.location.href = `/portal?t=${encodeURIComponent(token)}`;
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    window.location.href = `/portal?t=${encodeURIComponent(data.token)}`;
                 } else {
-                    errorMessage.textContent = data.error || 'Invalid or expired token. Please check and try again.';
-                    errorMessage.classList.add('show');
+                    showError(data.error || 'Sign-in failed. Please try again.');
+                    // Show the Google button again
+                    googleSignInContainer.style.display = 'flex';
+                    signingInOverlay.classList.remove('show');
                 }
             } catch (error) {
-                console.error('Validation error:', error);
-                errorMessage.textContent = 'Network error. Please check your connection and try again.';
-                errorMessage.classList.add('show');
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = 'Sign In';
+                console.error('Sign-in error:', error);
+                showError('Network error. Please check your connection and try again.');
+                googleSignInContainer.style.display = 'flex';
+                signingInOverlay.classList.remove('show');
             }
-        });
+        }
 
-        // Clear error on focus
-        document.getElementById('token').addEventListener('focus', function() {
-            document.getElementById('errorMessage').classList.remove('show');
-        });
+        // Fetch the Google Client ID from our API, then initialize
+        async function initGoogleSignIn() {
+            try {
+                const res = await fetch('/api/auth/google-client-id');
+                const data = await res.json();
+
+                if (!res.ok || !data.clientId) {
+                    googleSignInContainer.innerHTML = '<div class="loading-signin">Google Sign-In is not configured. Please contact your administrator.</div>';
+                    return;
+                }
+
+                google.accounts.id.initialize({
+                    client_id: data.clientId,
+                    callback: handleCredentialResponse,
+                });
+
+                googleSignInContainer.innerHTML = '';
+                google.accounts.id.renderButton(
+                    googleSignInContainer,
+                    {
+                        theme: 'outline',
+                        size: 'large',
+                        width: 320,
+                        text: 'signin_with',
+                    }
+                );
+            } catch (error) {
+                console.error('Failed to initialize Google Sign-In:', error);
+                googleSignInContainer.innerHTML = '<div class="loading-signin">Failed to load sign-in. Please refresh the page.</div>';
+            }
+        }
+
+        // Wait for the Google Identity Services library to load
+        function waitForGoogleLib() {
+            if (typeof google !== 'undefined' && google.accounts) {
+                initGoogleSignIn();
+            } else {
+                setTimeout(waitForGoogleLib, 100);
+            }
+        }
+
+        waitForGoogleLib();
     </script>
 </body>
 </html>

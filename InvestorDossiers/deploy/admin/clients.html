@@ -302,7 +302,8 @@
             font-size: 14px;
         }
 
-        .form-group input[type="text"] {
+        .form-group input[type="text"],
+        .form-group input[type="email"] {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e0e0e0;
@@ -311,7 +312,8 @@
             transition: border-color 0.2s;
         }
 
-        .form-group input[type="text"]:focus {
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus {
             outline: none;
             border-color: #4a6cf7;
         }
@@ -455,6 +457,7 @@
                 <thead>
                     <tr>
                         <th>Client Name</th>
+                        <th>Email</th>
                         <th>Access Token</th>
                         <th>Authorized Dossiers</th>
                         <th>Status</th>
@@ -464,7 +467,7 @@
                 </thead>
                 <tbody id="clientsTableBody">
                     <tr>
-                        <td colspan="6" class="loading">Loading clients...</td>
+                        <td colspan="7" class="loading">Loading clients...</td>
                     </tr>
                 </tbody>
             </table>
@@ -481,6 +484,11 @@
                 <div class="form-group">
                     <label for="clientName">Client Name</label>
                     <input type="text" id="clientName" placeholder="e.g., Acme Corp" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientEmail">Client Email (for Google Sign-In)</label>
+                    <input type="email" id="clientEmail" placeholder="e.g., user@company.com">
                 </div>
 
                 <div class="form-group">
@@ -595,7 +603,7 @@
             if (!clients || clients.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="empty-state">
+                        <td colspan="7" class="empty-state">
                             <h3>No clients yet</h3>
                             <p>Create your first client to generate a shareable portal link.</p>
                         </td>
@@ -607,6 +615,7 @@
             tbody.innerHTML = clients.map(client => `
                 <tr>
                     <td class="client-name">${escapeHtml(client.name)}</td>
+                    <td style="font-size: 13px; color: #666;">${client.email ? escapeHtml(client.email) : '<span style="color: #ccc;">—</span>'}</td>
                     <td>
                         <span class="token-display">
                             ${client.token.slice(0, 12)}...
@@ -656,6 +665,7 @@
             document.getElementById('submitBtn').textContent = 'Create Client';
             document.getElementById('editClientId').value = '';
             document.getElementById('clientName').value = '';
+            document.getElementById('clientEmail').value = '';
             document.getElementById('portalLinkSection').style.display = 'none';
             renderDossierSelector([]);
             document.getElementById('clientModal').classList.add('show');
@@ -676,6 +686,7 @@
                 document.getElementById('submitBtn').textContent = 'Save Changes';
                 document.getElementById('editClientId').value = client.id;
                 document.getElementById('clientName').value = client.name;
+                document.getElementById('clientEmail').value = client.email || '';
 
                 currentPortalUrl = window.location.origin + data.portalUrl;
                 document.getElementById('portalLink').textContent = currentPortalUrl;
@@ -698,6 +709,7 @@
 
             const clientId = document.getElementById('editClientId').value;
             const name = document.getElementById('clientName').value.trim();
+            const email = document.getElementById('clientEmail').value.trim();
             const checkboxes = document.querySelectorAll('#dossierSelector input[type="checkbox"]:checked');
             const authorizedDossiers = Array.from(checkboxes).map(cb => cb.value);
 
@@ -716,7 +728,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${sessionId}`
                         },
-                        body: JSON.stringify({ name, authorizedDossiers })
+                        body: JSON.stringify({ name, email: email || null, authorizedDossiers })
                     });
                 } else {
                     // Create new client
@@ -726,7 +738,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${sessionId}`
                         },
-                        body: JSON.stringify({ name, authorizedDossiers })
+                        body: JSON.stringify({ name, email: email || null, authorizedDossiers })
                     });
                 }
 

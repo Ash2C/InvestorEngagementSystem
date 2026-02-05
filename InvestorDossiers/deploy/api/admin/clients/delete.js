@@ -70,6 +70,11 @@ export default async function handler(req, res) {
     // Delete token lookup
     await kv.del(`client-by-token:${client.token}`);
 
+    // Delete email lookup if exists
+    if (client.email) {
+      await kv.del(`client-by-email:${client.email}`);
+    }
+
     // Delete client data
     await kv.del(`client:${clientId}`);
 

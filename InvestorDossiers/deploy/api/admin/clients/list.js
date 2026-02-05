@@ -66,6 +66,7 @@ export default async function handler(req, res) {
         clients.push({
           id: client.id,
           name: client.name,
+          email: client.email || null,
           token: client.token,
           authorizedDossiers: client.authorizedDossiers || [],
           isActive: client.isActive,

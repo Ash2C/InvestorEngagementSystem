@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
   try {
     const { clientId } = req.query;
-    const { name, authorizedDossiers, isActive } = req.body;
+    const { name, email, authorizedDossiers, isActive } = req.body;
 
     if (!clientId) {
       return res.status(400).json({ error: 'Client ID is required' });
@@ -74,6 +74,32 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid client name' });
       }
       client.name = name.trim();
+    }
+
+    // Update email if provided
+    if (email !== undefined) {
+      const normalizedEmail = email ? email.trim().toLowerCase() : null;
+      const oldEmail = client.email || null;
+
+      // Check if new email is already in use by another client
+      if (normalizedEmail && normalizedEmail !== oldEmail) {
+        const existingClientId = await kv.get(`client-by-email:${normalizedEmail}`);
+        if (existingClientId && existingClientId !== clientId) {
+          return res.status(400).json({ error: 'This email is already assigned to another client' });
+        }
+      }
+
+      // Remove old email lookup
+      if (oldEmail && oldEmail !== normalizedEmail) {
+        await kv.del(`client-by-email:${oldEmail}`);
+      }
+
+      // Set new email lookup
+      if (normalizedEmail) {
+        await kv.set(`client-by-email:${normalizedEmail}`, clientId);
+      }
+
+      client.email = normalizedEmail;
     }
 
     if (authorizedDossiers !== undefined) {
@@ -100,6 +126,7 @@ export default async function handler(req, res) {
       client: {
         id: client.id,
         name: client.name,
+        email: client.email || null,
         token: client.token,
         authorizedDossiers: client.authorizedDossiers,
         isActive: client.isActive,

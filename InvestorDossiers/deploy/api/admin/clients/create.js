@@ -66,10 +66,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, authorizedDossiers = [] } = req.body;
+    const { name, email, authorizedDossiers = [] } = req.body;
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return res.status(400).json({ error: 'Client name is required' });
+    }
+
+    // Validate and normalize email if provided
+    const normalizedEmail = email ? email.trim().toLowerCase() : null;
+    if (normalizedEmail) {
+      // Check if email is already in use
+      const existingClientId = await kv.get(`client-by-email:${normalizedEmail}`);
+      if (existingClientId) {
+        return res.status(400).json({ error: 'This email is already assigned to another client' });
+      }
     }
 
     const clientId = generateClientId();
@@ -79,6 +89,7 @@ export default async function handler(req, res) {
     const client = {
       id: clientId,
       name: name.trim(),
+      email: normalizedEmail,
       token,
       authorizedDossiers: Array.isArray(authorizedDossiers) ? authorizedDossiers : [],
       isActive: true,
@@ -92,6 +103,11 @@ export default async function handler(req, res) {
     // Store token -> clientId mapping for fast lookup
     await kv.set(`client-by-token:${token}`, clientId);
 
+    // Store email -> clientId mapping for Google Sign-In lookup
+    if (normalizedEmail) {
+      await kv.set(`client-by-email:${normalizedEmail}`, clientId);
+    }
+
     // Add to client list
     const clientList = await kv.get('client-list') || [];
     clientList.push(clientId);
@@ -102,6 +118,7 @@ export default async function handler(req, res) {
       client: {
         id: client.id,
         name: client.name,
+        email: client.email,
         token: client.token,
         authorizedDossiers: client.authorizedDossiers,
         isActive: client.isActive,

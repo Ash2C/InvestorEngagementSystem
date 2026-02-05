@@ -8,7 +8,7 @@ A system for creating investor dossiers that help founders prepare for investor 
 
 **Multi-Tenant Platform**: The system supports multiple clients with isolated access:
 - **Admin Portal** (`/admin/`) - Password-protected management interface
-- **Client Portal** (`/portal?t={token}`) - Token-based access to assigned dossiers
+- **Client Portal** (`/portal?t={token}`) - Google Sign-In or direct token URL access to assigned dossiers
 - **Client-scoped data** - Positioning analyses are isolated per client
 
 ## Project Structure
@@ -32,7 +32,7 @@ investorengagementsystem/
     │   ├── README.md            # Documentation for reference files
     │   └── yoko-li-reference-dossier.html  # Gold standard dossier model
     └── deploy/                  # Vercel deployment
-        ├── index.html           # Client sign-in landing page
+        ├── index.html           # Client sign-in landing page (Google Sign-In)
         ├── yoko-li.html         # Yoko Li dossier (production)
         ├── saurabh-gupta.html   # Saurabh Gupta dossier
         ├── generate.html        # Dossier generator form page
@@ -62,7 +62,9 @@ investorengagementsystem/
             │   ├── admin-login.js       # Admin password validation
             │   ├── admin-logout.js      # Admin session invalidation
             │   ├── validate-session.js  # Admin session checking
-            │   └── validate-token.js    # Client token validation
+            │   ├── validate-token.js    # Client token validation
+            │   ├── google-client-id.js  # Returns Google OAuth Client ID
+            │   └── google-signin.js     # Google Sign-In token verification
             ├── admin/                   # Admin API endpoints
             │   └── clients/
             │       ├── list.js          # List all clients
@@ -133,6 +135,7 @@ InvestorDossiers/reference/yoko-li-reference-dossier.html
 ```env
 # Required for multi-tenant features
 ADMIN_PASSWORD=your-secure-password    # Admin portal authentication
+GOOGLE_CLIENT_ID=...                   # Google OAuth Client ID for client sign-in
 
 # Existing (unchanged)
 KV_REST_API_URL=...                    # Vercel KV connection
@@ -475,6 +478,17 @@ Both static dossier pages (Yoko Li, Saurabh Gupta) include a "Regenerate Profile
 ### DELETE /api/delete-briefing
 - Deletes briefing from KV storage
 
+### GET /api/auth/google-client-id
+- Returns the Google OAuth Client ID for frontend initialization
+- Returns: `{ clientId: "..." }`
+
+### POST /api/auth/google-signin
+- Accepts JSON body: `{ credential }` (Google ID token)
+- Verifies token via `https://oauth2.googleapis.com/tokeninfo`
+- Validates `aud` matches `GOOGLE_CLIENT_ID` env var
+- Looks up `client-by-email:{email}` in KV
+- Returns: `{ success: true, token: "tok_..." }` or error
+
 ### POST /api/client/generate-dossier
 - Accepts JSON body: `{ firstName, lastName, company, clientToken }`
 - Validates client token
@@ -614,13 +628,13 @@ The platform supports multiple clients with isolated access to investor dossiers
 | Role | Access Method | Details |
 |------|---------------|---------|
 | Admin | Password authentication | `/admin/` - Full management access |
-| Client | Token URLs | `/portal?t=tok_xxx` - Access to assigned dossiers only |
+| Client | Google Sign-In or direct token URL | `/` (Google Sign-In) or `/portal?t=tok_xxx` |
 
 ### URL Structure
 
 **Home Page:**
 ```
-/                    → Client sign-in (enter access token)
+/                    → Client sign-in (Google Sign-In)
 ```
 
 **Admin Portal:**
@@ -644,8 +658,9 @@ The platform supports multiple clients with isolated access to investor dossiers
 
 **Client Management Keys:**
 ```
-client:{clientId}                              → { id, name, token, authorizedDossiers[], isActive, createdAt }
+client:{clientId}                              → { id, name, email, token, authorizedDossiers[], isActive, createdAt }
 client-by-token:{token}                        → clientId (fast lookup)
+client-by-email:{email}                        → clientId (Google Sign-In lookup)
 client-list                                    → [clientId, ...]
 ```
 
@@ -686,10 +701,11 @@ generated-dossiers-list                        → Master list of all dossiers
 ### Client Experience Flow
 
 ```
-1. Admin creates client "Acme Corp" → gets token tok_abc123...
+1. Admin creates client "Acme Corp" with email user@acme.com → gets token tok_abc123...
 2. Admin assigns dossiers [yoko-li, marc-andreessen] to client
-3. Admin shares link: https://investor-dossiers.vercel.app/portal?t=tok_abc123
-4. Client opens link → sees only Yoko Li and Marc Andreessen dossiers
+3. Client visits https://investor-dossiers.vercel.app/ → signs in with Google (user@acme.com)
+4. System looks up email → redirects to /portal?t=tok_abc123
+5. Client sees only Yoko Li and Marc Andreessen dossiers
 5. Client clicks "Yoko Li" → views full dossier
 6. Client uploads briefing → gets personalized positioning analysis
 7. Analysis is stored privately (other clients can't see it)
@@ -721,6 +737,25 @@ generated-dossiers-list                        → Master list of all dossiers
 ---
 
 ## Changelog
+
+### 2026-02-06: Google Sign-In for Client Portal
+- **Feature**: Replaced access token input on home page with Google Sign-In
+- **Admin Changes**:
+  - Admin can now assign an email address when creating/editing a client
+  - Email shown in clients table and stored as `client-by-email:{email}` KV key for fast lookup
+  - Email uniqueness enforced (one email per client)
+  - Email KV key cleaned up on client update/delete
+- **Client Sign-In Flow**:
+  - Home page (`/`) shows "Sign in with Google" button (no more token input)
+  - Google ID token verified server-side via `oauth2.googleapis.com/tokeninfo`
+  - Email extracted from token, looked up in KV → redirects to portal with client's token
+  - Shows appropriate errors for unknown emails, inactive accounts, or config issues
+- **New API Endpoints**:
+  - `GET /api/auth/google-client-id` - Returns Google OAuth Client ID to frontend
+  - `POST /api/auth/google-signin` - Verifies Google credential and returns client token
+- **New Environment Variable**: `GOOGLE_CLIENT_ID` - Required for Google Sign-In
+- **Prerequisite**: Create Google Cloud OAuth Client ID and add authorized origins
+- **No Breaking Changes**: Direct portal URLs (`/portal?t={token}`) still work
 
 ### 2026-02-06: Client Sign-In Landing Page
 - **Feature**: Home page (`/`) is now a client sign-in page instead of the Yoko Li dossier
