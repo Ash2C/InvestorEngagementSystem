@@ -66,7 +66,7 @@ export default async function handler(req, res) {
         clients.push({
           id: client.id,
           name: client.name,
-          email: client.email || null,
+          emails: Array.isArray(client.emails) ? client.emails : (client.email ? [client.email] : []),
           token: client.token,
           authorizedDossiers: client.authorizedDossiers || [],
           isActive: client.isActive,

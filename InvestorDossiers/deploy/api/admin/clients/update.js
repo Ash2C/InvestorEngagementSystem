@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
   try {
     const { clientId } = req.query;
-    const { name, email, authorizedDossiers, isActive } = req.body;
+    const { name, email, emails: emailsInput, authorizedDossiers, isActive } = req.body;
 
     if (!clientId) {
       return res.status(400).json({ error: 'Client ID is required' });
@@ -76,30 +76,49 @@ export default async function handler(req, res) {
       client.name = name.trim();
     }
 
-    // Update email if provided
-    if (email !== undefined) {
-      const normalizedEmail = email ? email.trim().toLowerCase() : null;
-      const oldEmail = client.email || null;
+    // Update emails if provided (support both `emails` array and `email` string)
+    if (emailsInput !== undefined || email !== undefined) {
+      let rawEmails = [];
+      if (emailsInput !== undefined) {
+        rawEmails = Array.isArray(emailsInput) ? emailsInput : [];
+      } else if (email !== undefined) {
+        rawEmails = email ? [email] : [];
+      }
 
-      // Check if new email is already in use by another client
-      if (normalizedEmail && normalizedEmail !== oldEmail) {
-        const existingClientId = await kv.get(`client-by-email:${normalizedEmail}`);
-        if (existingClientId && existingClientId !== clientId) {
-          return res.status(400).json({ error: 'This email is already assigned to another client' });
+      // Normalize and deduplicate
+      const newEmails = [...new Set(
+        rawEmails.map(e => e.trim().toLowerCase()).filter(e => e.length > 0)
+      )];
+
+      // Get old emails (handle both old single-email and new multi-email format)
+      const oldEmails = Array.isArray(client.emails)
+        ? client.emails
+        : (client.email ? [client.email] : []);
+
+      // Check new emails for conflicts with other clients
+      for (const e of newEmails) {
+        if (!oldEmails.includes(e)) {
+          const existingClientId = await kv.get(`client-by-email:${e}`);
+          if (existingClientId && existingClientId !== clientId) {
+            return res.status(400).json({ error: `Email ${e} is already assigned to another client` });
+          }
         }
       }
 
-      // Remove old email lookup
-      if (oldEmail && oldEmail !== normalizedEmail) {
-        await kv.del(`client-by-email:${oldEmail}`);
+      // Remove old email lookups that are no longer in the list
+      for (const e of oldEmails) {
+        if (!newEmails.includes(e)) {
+          await kv.del(`client-by-email:${e}`);
+        }
       }
 
-      // Set new email lookup
-      if (normalizedEmail) {
-        await kv.set(`client-by-email:${normalizedEmail}`, clientId);
+      // Set new email lookups
+      for (const e of newEmails) {
+        await kv.set(`client-by-email:${e}`, clientId);
       }
 
-      client.email = normalizedEmail;
+      client.emails = newEmails;
+      delete client.email; // Remove legacy field
     }
 
     if (authorizedDossiers !== undefined) {
@@ -126,7 +145,7 @@ export default async function handler(req, res) {
       client: {
         id: client.id,
         name: client.name,
-        email: client.email || null,
+        emails: Array.isArray(client.emails) ? client.emails : (client.email ? [client.email] : []),
         token: client.token,
         authorizedDossiers: client.authorizedDossiers,
         isActive: client.isActive,

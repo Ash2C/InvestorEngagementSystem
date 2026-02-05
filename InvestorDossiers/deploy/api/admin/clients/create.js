@@ -66,19 +66,30 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, email, authorizedDossiers = [] } = req.body;
+    const { name, email, emails: emailsInput, authorizedDossiers = [] } = req.body;
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return res.status(400).json({ error: 'Client name is required' });
     }
 
-    // Validate and normalize email if provided
-    const normalizedEmail = email ? email.trim().toLowerCase() : null;
-    if (normalizedEmail) {
-      // Check if email is already in use
-      const existingClientId = await kv.get(`client-by-email:${normalizedEmail}`);
+    // Support both `emails` (array) and `email` (string) for backward compat
+    let rawEmails = [];
+    if (Array.isArray(emailsInput) && emailsInput.length > 0) {
+      rawEmails = emailsInput;
+    } else if (email) {
+      rawEmails = [email];
+    }
+
+    // Normalize and deduplicate emails
+    const normalizedEmails = [...new Set(
+      rawEmails.map(e => e.trim().toLowerCase()).filter(e => e.length > 0)
+    )];
+
+    // Check if any email is already in use
+    for (const e of normalizedEmails) {
+      const existingClientId = await kv.get(`client-by-email:${e}`);
       if (existingClientId) {
-        return res.status(400).json({ error: 'This email is already assigned to another client' });
+        return res.status(400).json({ error: `Email ${e} is already assigned to another client` });
       }
     }
 
@@ -89,7 +100,7 @@ export default async function handler(req, res) {
     const client = {
       id: clientId,
       name: name.trim(),
-      email: normalizedEmail,
+      emails: normalizedEmails,
       token,
       authorizedDossiers: Array.isArray(authorizedDossiers) ? authorizedDossiers : [],
       isActive: true,
@@ -104,8 +115,8 @@ export default async function handler(req, res) {
     await kv.set(`client-by-token:${token}`, clientId);
 
     // Store email -> clientId mapping for Google Sign-In lookup
-    if (normalizedEmail) {
-      await kv.set(`client-by-email:${normalizedEmail}`, clientId);
+    for (const e of normalizedEmails) {
+      await kv.set(`client-by-email:${e}`, clientId);
     }
 
     // Add to client list
@@ -118,7 +129,7 @@ export default async function handler(req, res) {
       client: {
         id: client.id,
         name: client.name,
-        email: client.email,
+        emails: client.emails,
         token: client.token,
         authorizedDossiers: client.authorizedDossiers,
         isActive: client.isActive,

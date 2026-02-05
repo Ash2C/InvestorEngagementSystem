@@ -457,7 +457,7 @@
                 <thead>
                     <tr>
                         <th>Client Name</th>
-                        <th>Email</th>
+                        <th>Emails</th>
                         <th>Access Token</th>
                         <th>Authorized Dossiers</th>
                         <th>Status</th>
@@ -487,8 +487,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="clientEmail">Client Email (for Google Sign-In)</label>
-                    <input type="email" id="clientEmail" placeholder="e.g., user@company.com">
+                    <label>Client Emails (for Google Sign-In)</label>
+                    <div id="emailsContainer"></div>
+                    <button type="button" class="btn-secondary" style="margin-top: 8px; padding: 8px 16px; font-size: 13px;" onclick="addEmailField()">+ Add Email</button>
                 </div>
 
                 <div class="form-group">
@@ -615,7 +616,7 @@
             tbody.innerHTML = clients.map(client => `
                 <tr>
                     <td class="client-name">${escapeHtml(client.name)}</td>
-                    <td style="font-size: 13px; color: #666;">${client.email ? escapeHtml(client.email) : '<span style="color: #ccc;">—</span>'}</td>
+                    <td style="font-size: 13px; color: #666;">${client.emails && client.emails.length > 0 ? client.emails.map(e => escapeHtml(e)).join('<br>') : '<span style="color: #ccc;">—</span>'}</td>
                     <td>
                         <span class="token-display">
                             ${client.token.slice(0, 12)}...
@@ -660,12 +661,40 @@
             `).join('');
         }
 
+        function addEmailField(value = '') {
+            const container = document.getElementById('emailsContainer');
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px; align-items: center;';
+            row.innerHTML = `
+                <input type="email" class="client-email-input" value="${escapeHtml(value)}" placeholder="e.g., user@company.com"
+                    style="flex: 1; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                <button type="button" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px;">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function setEmailFields(emails) {
+            const container = document.getElementById('emailsContainer');
+            container.innerHTML = '';
+            if (emails && emails.length > 0) {
+                emails.forEach(e => addEmailField(e));
+            } else {
+                addEmailField('');
+            }
+        }
+
+        function getEmailValues() {
+            return Array.from(document.querySelectorAll('.client-email-input'))
+                .map(input => input.value.trim())
+                .filter(e => e.length > 0);
+        }
+
         function openCreateModal() {
             document.getElementById('modalTitle').textContent = 'Create New Client';
             document.getElementById('submitBtn').textContent = 'Create Client';
             document.getElementById('editClientId').value = '';
             document.getElementById('clientName').value = '';
-            document.getElementById('clientEmail').value = '';
+            setEmailFields([]);
             document.getElementById('portalLinkSection').style.display = 'none';
             renderDossierSelector([]);
             document.getElementById('clientModal').classList.add('show');
@@ -686,7 +715,7 @@
                 document.getElementById('submitBtn').textContent = 'Save Changes';
                 document.getElementById('editClientId').value = client.id;
                 document.getElementById('clientName').value = client.name;
-                document.getElementById('clientEmail').value = client.email || '';
+                setEmailFields(client.emails || (client.email ? [client.email] : []));
 
                 currentPortalUrl = window.location.origin + data.portalUrl;
                 document.getElementById('portalLink').textContent = currentPortalUrl;
@@ -709,7 +738,7 @@
 
             const clientId = document.getElementById('editClientId').value;
             const name = document.getElementById('clientName').value.trim();
-            const email = document.getElementById('clientEmail').value.trim();
+            const emails = getEmailValues();
             const checkboxes = document.querySelectorAll('#dossierSelector input[type="checkbox"]:checked');
             const authorizedDossiers = Array.from(checkboxes).map(cb => cb.value);
 
@@ -728,7 +757,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${sessionId}`
                         },
-                        body: JSON.stringify({ name, email: email || null, authorizedDossiers })
+                        body: JSON.stringify({ name, emails, authorizedDossiers })
                     });
                 } else {
                     // Create new client
@@ -738,7 +767,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${sessionId}`
                         },
-                        body: JSON.stringify({ name, email: email || null, authorizedDossiers })
+                        body: JSON.stringify({ name, emails, authorizedDossiers })
                     });
                 }
 
