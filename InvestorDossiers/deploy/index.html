@@ -164,7 +164,13 @@
                 const data = await res.json();
 
                 if (res.ok && data.success) {
-                    window.location.href = `/portal?t=${encodeURIComponent(data.token)}`;
+                    if (data.isAdmin) {
+                        localStorage.setItem('adminSessionId', data.sessionId);
+                        localStorage.setItem('adminSessionExpires', data.expiresAt);
+                        window.location.href = '/admin/dashboard.html';
+                    } else {
+                        window.location.href = `/portal?t=${encodeURIComponent(data.token)}`;
+                    }
                 } else {
                     showError(data.error || 'Sign-in failed. Please try again.');
                     // Show the Google button again

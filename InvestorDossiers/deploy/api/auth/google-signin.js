@@ -1,8 +1,13 @@
 import { kv } from '@vercel/kv';
+import crypto from 'crypto';
 
 export const config = {
   runtime: 'nodejs',
 };
+
+function generateSessionId() {
+  return 'sess_' + crypto.randomBytes(32).toString('base64url');
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -52,6 +57,27 @@ export default async function handler(req, res) {
 
     const normalizedEmail = email.trim().toLowerCase();
 
+    // Check if this is the admin email
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail && normalizedEmail === adminEmail.trim().toLowerCase()) {
+      const sessionId = generateSessionId();
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+      await kv.set(`admin-session:${sessionId}`, {
+        sessionId,
+        createdAt: now.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+      }, { ex: 86400 });
+
+      return res.status(200).json({
+        success: true,
+        isAdmin: true,
+        sessionId,
+        expiresAt: expiresAt.toISOString(),
+      });
+    }
+
     // Look up client by email
     const clientId = await kv.get(`client-by-email:${normalizedEmail}`);
 
@@ -81,6 +107,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
+      isAdmin: false,
       token: client.token,
     });
   } catch (error) {

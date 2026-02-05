@@ -134,8 +134,9 @@ InvestorDossiers/reference/yoko-li-reference-dossier.html
 
 ```env
 # Required for multi-tenant features
-ADMIN_PASSWORD=your-secure-password    # Admin portal authentication
-GOOGLE_CLIENT_ID=...                   # Google OAuth Client ID for client sign-in
+ADMIN_PASSWORD=your-secure-password    # Admin portal authentication (legacy fallback)
+ADMIN_EMAIL=vincent@01.co              # Admin Google Sign-In email
+GOOGLE_CLIENT_ID=...                   # Google OAuth Client ID for sign-in
 
 # Existing (unchanged)
 KV_REST_API_URL=...                    # Vercel KV connection
@@ -486,8 +487,8 @@ Both static dossier pages (Yoko Li, Saurabh Gupta) include a "Regenerate Profile
 - Accepts JSON body: `{ credential }` (Google ID token)
 - Verifies token via `https://oauth2.googleapis.com/tokeninfo`
 - Validates `aud` matches `GOOGLE_CLIENT_ID` env var
-- Looks up `client-by-email:{email}` in KV
-- Returns: `{ success: true, token: "tok_..." }` or error
+- If email matches `ADMIN_EMAIL`: creates admin session, returns `{ success: true, isAdmin: true, sessionId, expiresAt }`
+- Else looks up `client-by-email:{email}` in KV, returns `{ success: true, isAdmin: false, token }` or error
 
 ### POST /api/client/generate-dossier
 - Accepts JSON body: `{ firstName, lastName, company, clientToken }`
@@ -627,7 +628,7 @@ The platform supports multiple clients with isolated access to investor dossiers
 
 | Role | Access Method | Details |
 |------|---------------|---------|
-| Admin | Password authentication | `/admin/` - Full management access |
+| Admin | Google Sign-In (ADMIN_EMAIL) | `/admin/` or `/` - Full management access |
 | Client | Google Sign-In or direct token URL | `/` (Google Sign-In) or `/portal?t=tok_xxx` |
 
 ### URL Structure
@@ -691,7 +692,7 @@ generated-dossiers-list                        → Master list of all dossiers
 ### Admin Experience Flow
 
 ```
-1. Admin goes to /admin/ → enters password
+1. Admin goes to /admin/ (or `/`) → signs in with Google (ADMIN_EMAIL)
 2. Dashboard shows: client count, dossier count, recent activity
 3. Admin clicks "Clients" → sees all clients with their assigned dossiers
 4. Admin clicks "New Client" → enters name, selects dossiers → gets shareable link
@@ -737,6 +738,15 @@ generated-dossiers-list                        → Master list of all dossiers
 ---
 
 ## Changelog
+
+### 2026-02-06: Google Sign-In Admin Authentication
+- **Feature**: Admin authentication via Google Sign-In instead of password
+- **Admin Detection**: `ADMIN_EMAIL` env var (e.g. `vincent@01.co`) — when this email signs in via Google on `/` or `/admin/`, an admin session is created and user is redirected to `/admin/dashboard.html`
+- **Admin Login Page**: Replaced password form on `/admin/index.html` with Google Sign-In button; non-admin emails shown "not authorized" error
+- **Landing Page**: `handleCredentialResponse` now checks `isAdmin` — admins go to dashboard, clients go to portal
+- **API Changes**: `POST /api/auth/google-signin` now checks `ADMIN_EMAIL` first, creates admin session if matched, otherwise falls back to client lookup
+- **New Environment Variable**: `ADMIN_EMAIL` — email address of the admin user
+- **Backward Compatibility**: Password login (`/api/auth/admin-login`) kept as emergency fallback; existing admin sessions still work
 
 ### 2026-02-06: Google Sign-In for Client Portal
 - **Feature**: Replaced access token input on home page with Google Sign-In
