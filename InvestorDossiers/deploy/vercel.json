@@ -3,7 +3,8 @@
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/", "destination": "/admin/index.html" },
-    { "source": "/portal", "destination": "/portal.html" }
+    { "source": "/portal", "destination": "/portal.html" },
+    { "source": "/yoko-li", "destination": "/yoko-li.html" }
   ],
   "functions": {
     "api/**/*.js": {

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A system for creating investor dossiers that help founders prepare for investor meetings. The flagship feature is the Yoko Li investor dossier, deployed at https://investor-dossiers.vercel.app/
+A system for creating investor dossiers that help founders prepare for investor meetings. The flagship feature is the Yoko Li investor dossier, deployed at https://investor-dossiers.vercel.app/yoko-li
 
 **New**: The system now includes an AI-powered dossier generator that can create comprehensive investor profiles for any investor by researching publicly available information.
 
@@ -32,7 +32,8 @@ investorengagementsystem/
     │   ├── README.md            # Documentation for reference files
     │   └── yoko-li-reference-dossier.html  # Gold standard dossier model
     └── deploy/                  # Vercel deployment
-        ├── index.html           # Production HTML (Yoko Li dossier)
+        ├── index.html           # Client sign-in landing page
+        ├── yoko-li.html         # Yoko Li dossier (production)
         ├── saurabh-gupta.html   # Saurabh Gupta dossier
         ├── generate.html        # Dossier generator form page
         ├── dossier.html         # Dynamic dossier viewer
@@ -617,9 +618,14 @@ The platform supports multiple clients with isolated access to investor dossiers
 
 ### URL Structure
 
+**Home Page:**
+```
+/                    → Client sign-in (enter access token)
+```
+
 **Admin Portal:**
 ```
-/admin/              → Login page
+/admin/              → Admin login page
 /admin/dashboard.html → Dashboard (protected)
 /admin/clients.html   → Manage clients (protected)
 /admin/dossiers.html  → All dossiers (protected)
@@ -631,7 +637,7 @@ The platform supports multiple clients with isolated access to investor dossiers
 ```
 
 **Dossier Viewing:**
-- **Static dossiers** (yoko-li, saurabh-gupta): Link directly to full HTML pages (`/index.html`, `/saurabh-gupta.html`)
+- **Static dossiers** (yoko-li, saurabh-gupta): Link directly to full HTML pages (`/yoko-li.html`, `/saurabh-gupta.html`)
 - **AI-generated dossiers**: Use `/portal-dossier.html?t={token}&investor={slug}` which fetches from KV storage
 
 ### Data Model (Vercel KV)
@@ -715,6 +721,18 @@ generated-dossiers-list                        → Master list of all dossiers
 ---
 
 ## Changelog
+
+### 2026-02-06: Client Sign-In Landing Page
+- **Feature**: Home page (`/`) is now a client sign-in page instead of the Yoko Li dossier
+- **Renamed**: `deploy/index.html` (Yoko Li) → `deploy/yoko-li.html`
+- **New**: `deploy/index.html` is a clean sign-in page styled like the admin login
+  - Clients enter their access token, which is validated via `/api/auth/validate-token`
+  - On success, redirects to `/portal?t={token}`
+  - Shows inline error for invalid/expired tokens
+- **Updated References**:
+  - `api/client/dossiers.js` staticUrl → `/yoko-li.html`
+  - `generate.html` header link → `/yoko-li.html`
+  - `vercel.json` added `/yoko-li` rewrite
 
 ### 2026-02-06: Client Portal Dossier Generation
 - **Feature**: Clients can now generate new investor dossiers directly from the portal

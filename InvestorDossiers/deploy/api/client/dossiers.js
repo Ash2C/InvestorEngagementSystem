@@ -43,7 +43,7 @@ const STATIC_DOSSIERS = {
     company: 'Andreessen Horowitz (a16z)',
     role: 'Partner, AI & Infrastructure',
     isStatic: true,
-    staticUrl: '/index.html'  // Yoko Li is the main index page
+    staticUrl: '/yoko-li.html'
   },
   'saurabh-gupta': {
     slug: 'saurabh-gupta',
