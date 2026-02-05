@@ -36,10 +36,12 @@ investorengagementsystem/
         ├── saurabh-gupta.html   # Saurabh Gupta dossier
         ├── generate.html        # Dossier generator form page
         ├── dossier.html         # Dynamic dossier viewer
-        ├── portal.html          # Client portal - lists assigned dossiers
+        ├── portal.html          # Client portal - lists assigned dossiers + generate new
         ├── portal-dossier.html  # Client dossier view with token auth
         ├── vercel.json          # Vercel configuration
         ├── package.json         # Dependencies
+        ├── lib/                 # Shared modules (NOT serverless functions)
+        │   └── generate-dossier-core.js  # Shared dossier generation logic
         ├── admin/               # Admin portal (password protected)
         │   ├── index.html       # Admin login page
         │   ├── dashboard.html   # Admin dashboard
@@ -70,7 +72,8 @@ investorengagementsystem/
             │       └── regenerate-token.js  # Regenerate client token
             └── client/                  # Client API endpoints
                 ├── dossiers.js          # Get client's authorized dossiers
-                └── briefing.js          # Client-scoped briefing operations
+                ├── briefing.js          # Client-scoped briefing operations
+                └── generate-dossier.js  # Client-authenticated dossier generation
 ```
 
 ## Design Reference: Yoko Li Dossier
@@ -471,6 +474,14 @@ Both static dossier pages (Yoko Li, Saurabh Gupta) include a "Regenerate Profile
 ### DELETE /api/delete-briefing
 - Deletes briefing from KV storage
 
+### POST /api/client/generate-dossier
+- Accepts JSON body: `{ firstName, lastName, company, clientToken }`
+- Validates client token
+- Checks KV for existing `investor-profile:{slug}`; reuses if found
+- If not found, generates new dossier via shared `lib/generate-dossier-core.js`
+- Auto-adds slug to `client.authorizedDossiers[]`
+- Returns: `{ success, investorSlug, profile, verification, generatedAt, reused, viewUrl }`
+
 ---
 
 ## Tech Stack
@@ -676,6 +687,9 @@ generated-dossiers-list                        → Master list of all dossiers
 5. Client clicks "Yoko Li" → views full dossier
 6. Client uploads briefing → gets personalized positioning analysis
 7. Analysis is stored privately (other clients can't see it)
+8. Client clicks "Generate New Dossier" → enters investor name/company
+9. System generates (or reuses existing) dossier → auto-assigns to client
+10. New dossier card appears in portal grid
 ```
 
 ### Security Notes
@@ -701,6 +715,22 @@ generated-dossiers-list                        → Master list of all dossiers
 ---
 
 ## Changelog
+
+### 2026-02-06: Client Portal Dossier Generation
+- **Feature**: Clients can now generate new investor dossiers directly from the portal
+- **New Files**:
+  - `lib/generate-dossier-core.js` - Shared dossier generation logic (prompt, verification, KV storage)
+  - `api/client/generate-dossier.js` - Client-authenticated generation endpoint
+- **Modified Files**:
+  - `api/generate-dossier.js` - Refactored to use shared `lib/generate-dossier-core.js` module
+  - `portal.html` - Added "Generate New Dossier" button and modal with form/loading/success/error states
+- **Behavior**:
+  - Validates client token before generation
+  - Reuses existing profiles from KV if already generated (instant response)
+  - Auto-assigns generated dossier to client's `authorizedDossiers`
+  - Modal overlay with rotating status messages during generation
+  - Empty state shows "Generate Your First Dossier" CTA
+  - Public `/api/generate-dossier` endpoint unchanged (same API contract)
 
 ### 2026-02-04: Static Dossier Fix for Client Portal
 - **Problem**: Client portal showed minimal AI-generated content for static dossiers (yoko-li, saurabh-gupta) because `portal-dossier.html` fetches from KV storage where static dossiers don't exist

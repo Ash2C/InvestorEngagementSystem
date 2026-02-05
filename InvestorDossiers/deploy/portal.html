@@ -49,17 +49,46 @@
 
         .page-header {
             margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
-        .page-header h2 {
+        .page-header-text h2 {
             font-size: 32px;
             color: #1a1a2e;
             margin-bottom: 8px;
         }
 
-        .page-header p {
+        .page-header-text p {
             font-size: 16px;
             color: #666;
+        }
+
+        .btn-generate {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4a6cf7 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 108, 247, 0.4);
+        }
+
+        .btn-generate svg {
+            width: 18px;
+            height: 18px;
         }
 
         .dossiers-grid {
@@ -258,6 +287,487 @@
 
         .empty-state p {
             color: #666;
+            margin-bottom: 24px;
+        }
+
+        .btn-empty-generate {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #4a6cf7 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-empty-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 108, 247, 0.4);
+        }
+
+        .btn-empty-generate svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.show .modal {
+            transform: translateY(0);
+        }
+
+        .modal h3 {
+            font-size: 22px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .modal .form-group {
+            margin-bottom: 20px;
+        }
+
+        .modal .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .modal .form-group input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .modal .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #4a6cf7;
+        }
+
+        .modal .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn-modal-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #4a6cf7 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-modal-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 108, 247, 0.4);
+        }
+
+        .btn-modal-primary:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-modal-primary svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-modal-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-modal-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Modal Loading State */
+        .modal-loading {
+            display: none;
+            text-align: center;
+            padding: 32px 16px;
+        }
+
+        .modal-loading .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 20px;
+        }
+
+        .modal-loading-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .modal-loading-subtext {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .modal-loading-warning {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: #fef9c3;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #854d0e;
+        }
+
+        .modal-loading-warning svg {
+            flex-shrink: 0;
+            color: #f59e0b;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Modal Success State */
+        .modal-success {
+            display: none;
+        }
+
+        .modal-success .verification-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .modal-success .verification-banner.passed {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .modal-success .verification-banner.warning {
+            background: #fef9c3;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+
+        .modal-success .verification-banner.flagged {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .modal-success .verification-banner svg {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+        }
+
+        .verification-details {
+            flex: 1;
+        }
+
+        .verification-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .verification-stats {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .source-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 16px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .source-stat {
+            text-align: center;
+        }
+
+        .source-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4a6cf7;
+        }
+
+        .source-stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .modal-success .profile-preview {
+            padding: 20px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .profile-preview-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .profile-preview-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a6cf7 0%, #6366f1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-preview-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .profile-preview-role {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .profile-preview-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .profile-preview-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e0e8ff;
+            color: #4a6cf7;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .profile-preview-philosophy {
+            font-style: italic;
+            color: #555;
+            font-size: 13px;
+            border-left: 3px solid #4a6cf7;
+            padding-left: 12px;
+            margin-top: 12px;
+        }
+
+        /* Reused quick success */
+        .modal-reused {
+            display: none;
+            text-align: center;
+            padding: 24px 16px;
+        }
+
+        .modal-reused .success-icon {
+            width: 56px;
+            height: 56px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .modal-reused .success-icon svg {
+            color: #16a34a;
+            width: 28px;
+            height: 28px;
+        }
+
+        .modal-reused h4 {
+            font-size: 18px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .modal-reused p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Modal Error State */
+        .modal-error {
+            display: none;
+            text-align: center;
+            padding: 24px 16px;
+        }
+
+        .modal-error .error-icon {
+            width: 56px;
+            height: 56px;
+            background: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .modal-error .error-icon svg {
+            color: #dc2626;
+            width: 28px;
+            height: 28px;
+        }
+
+        .modal-error h4 {
+            font-size: 18px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .modal-error p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .modal-success-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-success-actions a,
+        .modal-success-actions button {
+            flex: 1;
+        }
+
+        .btn-view-dossier {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #4a6cf7 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-view-dossier:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 108, 247, 0.4);
+        }
+
+        .btn-view-dossier svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-done {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-done:hover {
+            background: #e0e0e0;
         }
 
         @media (max-width: 640px) {
@@ -269,8 +779,30 @@
                 grid-template-columns: 1fr;
             }
 
-            .page-header h2 {
+            .page-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .page-header-text h2 {
                 font-size: 24px;
+            }
+
+            .modal {
+                margin: 16px;
+                max-height: 90vh;
+            }
+
+            .modal .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .source-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modal-success-actions {
+                flex-direction: column;
             }
         }
     </style>
@@ -285,8 +817,16 @@
 
     <div class="container">
         <div class="page-header">
-            <h2>Your Investor Dossiers</h2>
-            <p>Select an investor to view their complete dossier and positioning analysis</p>
+            <div class="page-header-text">
+                <h2>Your Investor Dossiers</h2>
+                <p>Select an investor to view their complete dossier and positioning analysis</p>
+            </div>
+            <button class="btn-generate" id="btn-generate" onclick="openGenerateModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Generate New Dossier
+            </button>
         </div>
 
         <!-- Loading State -->
@@ -310,10 +850,129 @@
         <div id="dossiers-container" class="dossiers-grid" style="display: none;"></div>
     </div>
 
+    <!-- Generate Dossier Modal -->
+    <div class="modal-overlay" id="generateModal">
+        <div class="modal">
+            <!-- Form State -->
+            <div id="modal-form">
+                <h3>Generate New Dossier</h3>
+                <p class="modal-description">Enter the investor's details. Claude AI will research and compile a comprehensive dossier with source citations.</p>
+
+                <form id="generate-form" onsubmit="handleGenerate(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gen-firstName">First Name *</label>
+                            <input type="text" id="gen-firstName" placeholder="e.g., Marc" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gen-lastName">Last Name *</label>
+                            <input type="text" id="gen-lastName" placeholder="e.g., Andreessen" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="gen-company">Company / Firm *</label>
+                        <input type="text" id="gen-company" placeholder="e.g., Andreessen Horowitz" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-modal-secondary" onclick="closeGenerateModal()">Cancel</button>
+                        <button type="submit" class="btn-modal-primary" id="btn-submit-generate">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Generate Dossier
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loading State -->
+            <div id="modal-loading" class="modal-loading">
+                <div class="spinner"></div>
+                <p class="modal-loading-text" id="modal-loading-text">Researching investor...</p>
+                <p class="modal-loading-subtext">This may take 1-2 minutes as we compile comprehensive data with sources.</p>
+                <div class="modal-loading-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Please don't close this while generating.
+                </div>
+            </div>
+
+            <!-- Success State (full generation) -->
+            <div id="modal-success" class="modal-success">
+                <h3>Dossier Generated</h3>
+
+                <div id="modal-verification-banner" class="verification-banner passed">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="verification-details">
+                        <div class="verification-title" id="modal-verification-title">Dossier Generated Successfully</div>
+                        <div class="verification-stats" id="modal-verification-stats"></div>
+                    </div>
+                </div>
+
+                <div class="source-stats-grid" id="modal-source-stats"></div>
+
+                <div id="modal-profile-preview" class="profile-preview"></div>
+
+                <div class="modal-success-actions">
+                    <a href="#" id="modal-view-link" class="btn-view-dossier">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View Full Dossier
+                    </a>
+                    <button class="btn-done" onclick="closeGenerateModalAndRefresh()">Done</button>
+                </div>
+            </div>
+
+            <!-- Reused State (instant) -->
+            <div id="modal-reused" class="modal-reused">
+                <div class="success-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h4>Dossier Added to Your Portal</h4>
+                <p id="modal-reused-message">This investor dossier was already generated and has been added to your portal.</p>
+                <div class="modal-success-actions">
+                    <a href="#" id="modal-reused-view-link" class="btn-view-dossier">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View Full Dossier
+                    </a>
+                    <button class="btn-done" onclick="closeGenerateModalAndRefresh()">Done</button>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="modal-error" class="modal-error">
+                <div class="error-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h4>Generation Failed</h4>
+                <p id="modal-error-message">Something went wrong. Please try again.</p>
+                <button class="btn-modal-primary" onclick="resetModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Get token from URL
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('t');
+        let loadingInterval = null;
 
         if (!token) {
             showError('Invalid Access Link', 'No access token provided. Please use the link shared with you.');
@@ -339,6 +998,9 @@
 
                 // Hide loading, show content
                 document.getElementById('loading-state').style.display = 'none';
+
+                // Show generate button
+                document.getElementById('btn-generate').style.display = 'inline-flex';
 
                 if (!data.dossiers || data.dossiers.length === 0) {
                     showEmpty();
@@ -406,8 +1068,14 @@
             container.style.display = 'block';
             container.innerHTML = `
                 <div class="empty-state">
-                    <h3>No Dossiers Available</h3>
-                    <p>Your account doesn't have any investor dossiers assigned yet. Please contact your administrator.</p>
+                    <h3>No Dossiers Yet</h3>
+                    <p>You don't have any investor dossiers yet. Generate your first one to get started.</p>
+                    <button class="btn-empty-generate" onclick="openGenerateModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Generate Your First Dossier
+                    </button>
                 </div>
             `;
         }
@@ -418,6 +1086,198 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // --- Modal Functions ---
+
+        function openGenerateModal() {
+            resetModal();
+            document.getElementById('generateModal').classList.add('show');
+        }
+
+        function closeGenerateModal() {
+            document.getElementById('generateModal').classList.remove('show');
+            if (loadingInterval) {
+                clearInterval(loadingInterval);
+                loadingInterval = null;
+            }
+        }
+
+        function closeGenerateModalAndRefresh() {
+            closeGenerateModal();
+            // Reload dossiers to show the newly added one
+            document.getElementById('dossiers-container').style.display = 'none';
+            document.getElementById('loading-state').style.display = 'flex';
+            loadDossiers();
+        }
+
+        function resetModal() {
+            // Show form, hide other states
+            document.getElementById('modal-form').style.display = 'block';
+            document.getElementById('modal-loading').style.display = 'none';
+            document.getElementById('modal-success').style.display = 'none';
+            document.getElementById('modal-reused').style.display = 'none';
+            document.getElementById('modal-error').style.display = 'none';
+            document.getElementById('btn-submit-generate').disabled = false;
+
+            if (loadingInterval) {
+                clearInterval(loadingInterval);
+                loadingInterval = null;
+            }
+        }
+
+        function setModalState(state) {
+            document.getElementById('modal-form').style.display = state === 'form' ? 'block' : 'none';
+            document.getElementById('modal-loading').style.display = state === 'loading' ? 'block' : 'none';
+            document.getElementById('modal-success').style.display = state === 'success' ? 'block' : 'none';
+            document.getElementById('modal-reused').style.display = state === 'reused' ? 'block' : 'none';
+            document.getElementById('modal-error').style.display = state === 'error' ? 'block' : 'none';
+        }
+
+        async function handleGenerate(event) {
+            event.preventDefault();
+
+            const firstName = document.getElementById('gen-firstName').value.trim();
+            const lastName = document.getElementById('gen-lastName').value.trim();
+            const company = document.getElementById('gen-company').value.trim();
+
+            if (!firstName || !lastName || !company) return;
+
+            // Show loading state
+            setModalState('loading');
+
+            // Rotating status messages
+            const loadingSteps = [
+                'Searching for investor information...',
+                'Analyzing LinkedIn and Crunchbase...',
+                'Gathering portfolio data...',
+                'Compiling news and media appearances...',
+                'Generating comprehensive profile...',
+                'Verifying sources...'
+            ];
+
+            let stepIndex = 0;
+            loadingInterval = setInterval(() => {
+                stepIndex = (stepIndex + 1) % loadingSteps.length;
+                document.getElementById('modal-loading-text').textContent = loadingSteps[stepIndex];
+            }, 10000);
+
+            try {
+                const response = await fetch('/api/client/generate-dossier', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, company, clientToken: token })
+                });
+
+                clearInterval(loadingInterval);
+                loadingInterval = null;
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || error.details || 'Failed to generate dossier');
+                }
+
+                const data = await response.json();
+
+                if (data.reused) {
+                    // Show quick reused state
+                    document.getElementById('modal-reused-view-link').href = data.viewUrl;
+                    setModalState('reused');
+                } else {
+                    // Show full success state
+                    showModalSuccess(data);
+                }
+
+            } catch (err) {
+                clearInterval(loadingInterval);
+                loadingInterval = null;
+                document.getElementById('modal-error-message').textContent = err.message;
+                setModalState('error');
+            }
+        }
+
+        function showModalSuccess(data) {
+            const verification = data.verification || {};
+            const sourceStats = verification.sourceStats || {};
+
+            // Verification banner
+            const banner = document.getElementById('modal-verification-banner');
+            const title = document.getElementById('modal-verification-title');
+            const stats = document.getElementById('modal-verification-stats');
+
+            if (verification.isValid) {
+                banner.className = 'verification-banner passed';
+                title.textContent = 'Dossier Generated Successfully';
+                stats.textContent = `${sourceStats.sourceCoveragePercent || 0}% source coverage with ${sourceStats.uniqueSourceCount || 0} unique sources.`;
+            } else if (verification.summary && verification.summary.highSeverity > 0) {
+                banner.className = 'verification-banner flagged';
+                title.textContent = 'Dossier Generated with Warnings';
+                stats.textContent = `${verification.summary.highSeverity} unverified claim(s). Review sources carefully.`;
+            } else {
+                banner.className = 'verification-banner warning';
+                title.textContent = 'Dossier Generated';
+                stats.textContent = `${sourceStats.sourceCoveragePercent || 0}% source coverage. Some claims may need verification.`;
+            }
+
+            // Source stats
+            document.getElementById('modal-source-stats').innerHTML = `
+                <div class="source-stat">
+                    <div class="source-stat-value">${sourceStats.uniqueSourceCount || 0}</div>
+                    <div class="source-stat-label">Unique Sources</div>
+                </div>
+                <div class="source-stat">
+                    <div class="source-stat-value">${sourceStats.sourceCoveragePercent || 0}%</div>
+                    <div class="source-stat-label">Source Coverage</div>
+                </div>
+                <div class="source-stat">
+                    <div class="source-stat-value">${sourceStats.claimsWithTrustedSources || 0}</div>
+                    <div class="source-stat-label">Trusted Sources</div>
+                </div>
+                <div class="source-stat">
+                    <div class="source-stat-value">${sourceStats.totalClaims || 0}</div>
+                    <div class="source-stat-label">Total Claims</div>
+                </div>
+            `;
+
+            // Profile preview
+            const profile = data.profile || {};
+            const p = profile.profile || {};
+            const focus = profile.investmentFocus || {};
+            const thesis = profile.investmentThesis || {};
+            const initials = (p.name || 'IN').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            let previewHtml = `
+                <div class="profile-preview-header">
+                    <div class="profile-preview-avatar">${initials}</div>
+                    <div>
+                        <div class="profile-preview-name">${escapeHtml(p.name || 'Unknown Investor')}</div>
+                        <div class="profile-preview-role">${escapeHtml(p.role || 'Investor')} at ${escapeHtml(p.firm || '')}</div>
+                    </div>
+                </div>
+                <div class="profile-preview-meta">
+                    ${focus.areas && focus.areas.length ? `<span class="profile-preview-badge">${escapeHtml(focus.areas.slice(0, 3).join(' / '))}</span>` : ''}
+                    ${focus.stages && focus.stages.length ? `<span class="profile-preview-badge">${escapeHtml(focus.stages[0])} - ${escapeHtml(focus.stages[focus.stages.length - 1])}</span>` : ''}
+                    ${focus.checkSize && focus.checkSize.min ? `<span class="profile-preview-badge">${escapeHtml(focus.checkSize.min)} - ${escapeHtml(focus.checkSize.max || '?')}</span>` : ''}
+                </div>
+            `;
+
+            if (thesis.corePhilosophy) {
+                previewHtml += `<p class="profile-preview-philosophy">"${escapeHtml(thesis.corePhilosophy)}"</p>`;
+            }
+
+            document.getElementById('modal-profile-preview').innerHTML = previewHtml;
+
+            // View link
+            document.getElementById('modal-view-link').href = data.viewUrl;
+
+            setModalState('success');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('generateModal').addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeGenerateModal();
+            }
+        });
     </script>
 </body>
 </html>
