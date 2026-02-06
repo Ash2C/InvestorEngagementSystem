@@ -194,8 +194,29 @@ client-latest-briefing:{clientId}:{slug}       → briefingId reference
 
 ---
 
+## Planned: Merge GatherFAQandSlides into this repo
+
+The Investor Engagement System will become the **parent system** containing two sub-systems:
+
+```
+investorengagementsystem/
+├── InvestorDossiers/          ← existing (investor dossier platform)
+├── GatherFAQandSlides/        ← to be merged in (FAQ system)
+├── CLAUDE.md
+├── PROGRESS.md
+└── ...
+```
+
+- **InvestorDossiers/** — the current multi-tenant dossier platform (as-is)
+- **GatherFAQandSlides/** — FAQ and slides system from the separate `GatherFAQandSlides` project
+- Both are sub-systems within the Investor Engagement System umbrella
+- Migration will require consolidating deployment configs, shared auth, and potentially shared KV/Blob storage
+
+---
+
 ## Planned Features
 
+- [ ] **Merge GatherFAQandSlides project** into this repo as a sibling sub-system
 - [ ] Comparative analysis across multiple investors
 - [ ] Dossier search functionality
 - [ ] Export to Word/Slides
