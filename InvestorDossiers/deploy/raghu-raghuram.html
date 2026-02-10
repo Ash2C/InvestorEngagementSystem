@@ -1081,7 +1081,7 @@
         <div class="toolbar">
             <span class="last-updated" id="last-updated">Last updated: February 3, 2026</span>
             <div class="toolbar-buttons">
-                <a href="/generate.html" class="btn-regenerate-profile" style="text-decoration: none;">
+                <a href="/generate.html" class="btn-regenerate-profile" id="btn-generate-new" style="text-decoration: none;">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
@@ -2635,6 +2635,73 @@
         });
 
         checkExistingBriefing();
+    })();
+    </script>
+    <style>
+        .admin-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--gray-900);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .admin-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+    <div class="admin-toast" id="admin-toast">Only admin users can use this feature</div>
+    <script>
+    (function() {
+        let isAdmin = false;
+
+        async function checkAdminStatus() {
+            const sessionId = localStorage.getItem('adminSessionId');
+            if (!sessionId) return;
+            try {
+                const res = await fetch('/api/auth/validate-session', {
+                    headers: { 'Authorization': 'Bearer ' + sessionId }
+                });
+                if (res.ok) isAdmin = true;
+            } catch {}
+        }
+
+        function showToast() {
+            const toast = document.getElementById('admin-toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function gateButtons() {
+            const generateBtn = document.getElementById('btn-generate-new');
+            const regenerateBtn = document.getElementById('btn-regenerate-profile');
+
+            if (generateBtn) {
+                generateBtn.addEventListener('click', function(e) {
+                    if (!isAdmin) { e.preventDefault(); showToast(); }
+                });
+            }
+
+            if (regenerateBtn) {
+                const originalOnclick = regenerateBtn.getAttribute('onclick');
+                regenerateBtn.removeAttribute('onclick');
+                regenerateBtn.addEventListener('click', function() {
+                    if (!isAdmin) { showToast(); return; }
+                    if (originalOnclick) new Function(originalOnclick)();
+                });
+            }
+        }
+
+        checkAdminStatus();
+        gateButtons();
     })();
     </script>
 </body>
