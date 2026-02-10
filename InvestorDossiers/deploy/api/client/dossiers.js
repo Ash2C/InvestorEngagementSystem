@@ -52,6 +52,14 @@ const STATIC_DOSSIERS = {
     role: 'Co-Founder & Managing Partner',
     isStatic: true,
     staticUrl: '/saurabh-gupta.html'
+  },
+  'raghu-raghuram': {
+    slug: 'raghu-raghuram',
+    name: 'Raghu Raghuram',
+    company: 'Andreessen Horowitz (a16z)',
+    role: 'Managing Partner & General Partner, AI Infrastructure & Growth',
+    isStatic: true,
+    staticUrl: '/raghu-raghuram.html'
   }
 };
 

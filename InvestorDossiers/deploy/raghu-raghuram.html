@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raghu Raghuram - Investor Dossier</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .last-updated {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-download:hover { background: var(--primary-dark); }
+        .btn-download svg { width: 18px; height: 18px; }
+
+        .toolbar-buttons { display: flex; gap: 10px; }
+
+        .btn-regenerate-profile {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: white;
+            color: var(--gray-800);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-regenerate-profile:hover { background: var(--gray-50); border-color: var(--gray-300); }
+        .btn-regenerate-profile svg { width: 18px; height: 18px; }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h3 {
+            margin: 0 0 16px;
+            font-size: 1.25rem;
+            color: var(--gray-900);
+        }
+
+        .modal-warning {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            background: #fef9c3;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            color: #854d0e;
+        }
+
+        .modal-warning svg {
+            flex-shrink: 0;
+            color: #f59e0b;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        /* Profile Status Overlay */
+        .profile-status {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .profile-status-content {
+            text-align: center;
+            padding: 48px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-status-content p {
+            margin-top: 16px;
+            font-size: 1.1rem;
+            color: var(--gray-700);
+        }
+
+        .dossier {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            padding: 48px;
+        }
+
+        /* Profile Header */
+        .profile-header {
+            display: flex;
+            gap: 24px;
+            padding-bottom: 32px;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 40px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 2rem; font-weight: 700; margin-bottom: 4px; color: var(--gray-900); }
+        .profile-role { font-size: 1.1rem; color: var(--gray-600); margin-bottom: 16px; }
+
+        .profile-links { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .profile-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--gray-800);
+            text-decoration: none;
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+
+        .profile-link:hover { background: var(--gray-200); color: var(--primary); }
+        .profile-link svg { width: 16px; height: 16px; }
+
+        .profile-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 12px;
+        }
+
+        .meta-item { text-align: center; }
+        .meta-label { font-size: 0.75rem; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .meta-value { font-size: 1rem; font-weight: 600; color: var(--gray-900); }
+
+        /* Content Styles */
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 48px;
+            margin-bottom: 20px;
+            color: var(--gray-900);
+            border-bottom: 2px solid var(--gray-200);
+            padding-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            color: var(--gray-800);
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            color: var(--gray-700);
+        }
+
+        p { margin-bottom: 16px; }
+
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        ul, ol { margin-bottom: 16px; padding-left: 24px; }
+        li { margin-bottom: 8px; }
+
+        blockquote {
+            border-left: 4px solid var(--primary);
+            margin: 24px 0;
+            padding: 16px 24px;
+            background: #eff6ff;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+        }
+
+        blockquote p { margin-bottom: 0; }
+        blockquote cite { display: block; margin-top: 8px; font-style: normal; font-size: 0.9rem; color: var(--gray-600); }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border: 1px solid var(--gray-200);
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        th { background: var(--gray-50); font-weight: 600; color: var(--gray-900); }
+        tr:hover { background: var(--gray-50); }
+
+        strong { font-weight: 600; }
+        em { font-style: italic; }
+
+        .checklist { list-style: none; padding-left: 0; }
+        .checklist li { padding-left: 28px; position: relative; }
+        .checklist li::before { content: "☐"; position: absolute; left: 0; color: var(--gray-600); }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--gray-100);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .section-intro {
+            font-size: 1.05rem;
+            color: var(--gray-600);
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        @media print {
+            body { background: white; }
+            .container { padding: 0; }
+            .dossier { box-shadow: none; padding: 24px; }
+            a { color: var(--primary); text-decoration: underline; }
+            h2 { page-break-after: avoid; }
+            table, blockquote { page-break-inside: avoid; }
+            #positioning-upload, #positioning-analyzing, #positioning-error { display: none !important; }
+            .results-header { page-break-after: avoid; }
+            .score-card { page-break-inside: avoid; }
+            .result-section { page-break-inside: avoid; }
+            .alignment-card, .concern-card, .question-card, .analogy-card {
+                page-break-inside: avoid;
+                overflow: visible !important;
+            }
+            .language-grid { page-break-inside: avoid; }
+            .results-actions { display: none !important; }
+            #positioning-results { overflow: visible !important; }
+        }
+
+        /* PDF generation specific overrides */
+        .pdf-rendering,
+        .pdf-rendering * {
+            overflow: visible !important;
+            max-height: none !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .pdf-rendering .positioning-state,
+        .pdf-rendering .result-section,
+        .pdf-rendering .alignment-card,
+        .pdf-rendering .concern-card,
+        .pdf-rendering .question-card,
+        .pdf-rendering .analogy-card,
+        .pdf-rendering .score-card,
+        .pdf-rendering .language-grid,
+        .pdf-rendering #positioning-results {
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
+        }
+
+        .pdf-rendering .score-card {
+            background: #f0f9ff !important;
+            box-shadow: none !important;
+        }
+
+        .pdf-rendering .score-circle {
+            box-shadow: none !important;
+            border: 2px solid var(--primary) !important;
+            background: white !important;
+        }
+
+        .pdf-rendering .dossier {
+            box-shadow: none !important;
+        }
+
+        .pdf-rendering .alignment-card,
+        .pdf-rendering .concern-card,
+        .pdf-rendering .question-card,
+        .pdf-rendering .analogy-card {
+            box-shadow: none !important;
+            border: 1px solid #e5e7eb !important;
+            background: #f9fafb !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            margin-bottom: 16px !important;
+        }
+
+        .pdf-rendering .result-section {
+            break-inside: auto !important;
+            page-break-inside: auto !important;
+            margin-bottom: 24px !important;
+            padding-bottom: 20px !important;
+        }
+
+        .pdf-rendering .result-section h4 {
+            break-after: avoid !important;
+            page-break-after: avoid !important;
+            margin-top: 16px !important;
+        }
+
+        .pdf-rendering h2 {
+            break-before: auto !important;
+            break-after: avoid !important;
+            page-break-after: avoid !important;
+        }
+
+        .pdf-rendering h3,
+        .pdf-rendering h4,
+        .pdf-rendering h5 {
+            break-after: avoid !important;
+            page-break-after: avoid !important;
+        }
+
+        .pdf-rendering .tag-use,
+        .pdf-rendering .tag-avoid {
+            display: inline-block !important;
+            margin-bottom: 4px !important;
+        }
+
+        .pdf-rendering .language-grid {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .pdf-rendering .mitigation,
+        .pdf-rendering .response {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .pdf-rendering blockquote {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .pdf-rendering #positioning-container {
+            break-before: always !important;
+            page-break-before: always !important;
+        }
+
+        /* Positioning Section Styles */
+        .positioning-state { margin-top: 24px; }
+
+        .upload-zone {
+            border: 2px dashed var(--gray-200);
+            border-radius: 12px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--gray-50);
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .upload-icon { color: var(--gray-600); margin-bottom: 16px; }
+        .upload-text { font-size: 1.1rem; font-weight: 500; color: var(--gray-800); margin-bottom: 4px; }
+        .upload-subtext { font-size: 0.9rem; color: var(--gray-600); }
+
+        .upload-form { margin-top: 20px; }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .file-preview svg { color: var(--primary); flex-shrink: 0; }
+        .file-preview span { flex: 1; font-weight: 500; }
+
+        .btn-remove {
+            background: none;
+            border: none;
+            color: var(--gray-600);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+        }
+        .btn-remove:hover { color: #dc2626; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.9rem; }
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.15s;
+        }
+        .form-group input:focus { outline: none; border-color: var(--primary); }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled { background: var(--gray-200); cursor: not-allowed; }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            color: var(--gray-800);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-secondary:hover { background: var(--gray-50); border-color: var(--gray-300); }
+
+        .btn-upload { width: 100%; justify-content: center; }
+
+        /* Analyzing State */
+        .analyzing-container {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .analyzing-text { font-size: 1.1rem; font-weight: 500; color: var(--gray-800); margin-bottom: 8px; }
+        .analyzing-subtext { font-size: 0.9rem; color: var(--gray-600); }
+
+        /* Results State */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .results-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .company-badge, .file-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .company-badge { background: #dbeafe; color: #1e40af; }
+        .file-badge { background: var(--gray-100); color: var(--gray-600); }
+
+        .results-actions { display: flex; gap: 8px; }
+
+        .score-card {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 24px;
+            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .score-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .score-info h4 { margin: 0 0 8px; font-size: 1rem; }
+        .score-info p { margin: 0; color: var(--gray-600); font-size: 0.95rem; }
+
+        .result-section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .result-section:last-child { border-bottom: none; }
+
+        .result-section h4 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--gray-900);
+        }
+
+        .result-section h5 {
+            margin: 16px 0 8px;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+        }
+
+        .alignment-card, .concern-card, .question-card, .analogy-card {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .alignment-card h5, .concern-card h5, .question-card h5, .analogy-card h5 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+            color: var(--gray-900);
+        }
+
+        .alignment-card p, .concern-card p, .question-card p, .analogy-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--gray-700);
+        }
+
+        .alignment-card .evidence {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--gray-200);
+            font-style: italic;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .concern-card .mitigation {
+            margin-top: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #22c55e;
+        }
+
+        .concern-card .mitigation-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #22c55e;
+            margin-bottom: 4px;
+        }
+
+        .question-card .response {
+            margin-top: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .question-card .response-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .label-use { color: #22c55e; }
+        .label-avoid { color: #dc2626; }
+
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .tag-use {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .tag-avoid {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        /* Verification Status Styles */
+        .verification-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        .verification-banner.passed {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .verification-banner.warning {
+            background: #fef9c3;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+
+        .verification-banner.flagged {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .verification-banner svg {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+        }
+
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .verification-badge.verified {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .verification-badge.unverified {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .analogy-card .verification-badge {
+            margin-left: 0;
+            margin-top: 8px;
+            display: inline-flex;
+        }
+
+        /* Verification Warnings */
+        .verification-warnings {
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #fef9c3;
+            border: 1px solid #fde047;
+            border-radius: 8px;
+        }
+
+        .verification-warnings h5 {
+            margin: 0 0 12px;
+            font-size: 0.9rem;
+            color: #854d0e;
+        }
+
+        .verification-warning-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .verification-warning-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .verification-warning-item.high {
+            border-left: 3px solid #dc2626;
+        }
+
+        .verification-warning-item.medium {
+            border-left: 3px solid #f59e0b;
+        }
+
+        .verification-warning-item .field {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .verification-warning-item .message {
+            color: var(--gray-600);
+        }
+
+        /* Error State */
+        .error-container {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .error-container svg { color: #dc2626; margin-bottom: 16px; }
+        .error-text { font-size: 1.1rem; color: var(--gray-800); margin-bottom: 24px; }
+
+        @media (max-width: 640px) {
+            .upload-zone { padding: 32px 16px; }
+            .results-header { flex-direction: column; align-items: flex-start; }
+            .results-actions { width: 100%; }
+            .results-actions button { flex: 1; justify-content: center; }
+            .score-card { flex-direction: column; text-align: center; }
+            .language-grid { grid-template-columns: 1fr; }
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 20px 0;
+        }
+
+        .table-scroll table {
+            margin: 0;
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 16px; }
+            .toolbar {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+                padding: 16px;
+            }
+            .profile-header { flex-direction: column; text-align: center; }
+            .profile-avatar { width: 80px; height: 80px; font-size: 1.75rem; margin: 0 auto; }
+            .profile-name { font-size: 1.5rem; }
+            .profile-role { font-size: 1rem; }
+            .profile-links { justify-content: center; }
+            .profile-link { padding: 6px 12px; font-size: 0.85rem; }
+            .profile-meta { grid-template-columns: 1fr; }
+            .dossier { padding: 20px; }
+            h2 { font-size: 1.25rem; margin-top: 32px; }
+            h3 { font-size: 1.1rem; margin-top: 24px; }
+            h4 { font-size: 1rem; }
+            .table-scroll { margin: 16px -20px; padding: 0 20px; }
+            table { font-size: 0.8rem; min-width: 480px; }
+            th, td { padding: 8px 10px; }
+            blockquote { padding: 12px 16px; margin: 16px 0; font-size: 0.95rem; }
+            ul, ol { padding-left: 20px; }
+        }
+
+        /* Source Citation Styles */
+        .source-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            vertical-align: super;
+            margin-left: 2px;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        .source-link svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .source-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 600;
+            border-radius: 50%;
+            margin-left: 4px;
+            vertical-align: super;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .source-indicator:hover {
+            background: var(--primary-dark);
+        }
+
+        .claim-with-source {
+            position: relative;
+        }
+
+        .source-tooltip {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-900);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 100;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .claim-with-source:hover .source-tooltip {
+            display: block;
+        }
+
+        /* Sources Section */
+        .sources-section {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .sources-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .source-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .source-number {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .source-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .source-title {
+            font-weight: 500;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .source-url {
+            color: var(--primary);
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 0.85rem;
+        }
+
+        .source-url:hover {
+            text-decoration: underline;
+        }
+
+        .source-domain {
+            color: var(--gray-600);
+            font-size: 0.8rem;
+        }
+
+        .source-used-for {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+        }
+
+        /* Source Coverage Stats */
+        .source-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 12px;
+        }
+
+        .source-stat {
+            text-align: center;
+        }
+
+        .source-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .source-stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            margin-top: 4px;
+        }
+
+        /* AI Generated Profile Container */
+        #ai-generated-profile {
+            display: none;
+        }
+
+        #ai-generated-profile.active {
+            display: block;
+        }
+
+        .ai-profile-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .ai-profile-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="toolbar">
+            <span class="last-updated" id="last-updated">Last updated: February 3, 2026</span>
+            <div class="toolbar-buttons">
+                <a href="/generate.html" class="btn-regenerate-profile" style="text-decoration: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Generate New
+                </a>
+                <button class="btn-regenerate-profile" id="btn-regenerate-profile" onclick="showRegenerateModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Regenerate Profile
+                </button>
+                <button class="btn-download" onclick="downloadPDF()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Regenerate Profile Modal -->
+        <div id="regenerate-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Regenerate Investor Profile</h3>
+                <p class="modal-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    This will use AI to regenerate all investor profile sections including background, portfolio, thesis, and recent activity.
+                </p>
+                <p><strong>This may take 1-2 minutes to complete.</strong></p>
+                <p>All claims will include source citations linking to verifiable sources (LinkedIn, Crunchbase, news articles, etc.).</p>
+                <div class="modal-buttons">
+                    <button class="btn-secondary" onclick="hideRegenerateModal()">Cancel</button>
+                    <button class="btn-primary" id="btn-confirm-regenerate" onclick="regenerateProfile()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Regenerate
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Regeneration Status -->
+        <div id="profile-status" class="profile-status" style="display: none;">
+            <div class="profile-status-content">
+                <div class="spinner"></div>
+                <p id="profile-status-text">Regenerating investor profile...</p>
+            </div>
+        </div>
+
+        <!-- Profile Verification Banner (for regenerated content) -->
+        <div id="profile-verification-banner" class="verification-banner" style="display: none; margin: 16px 0;">
+            <svg id="profile-verification-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span id="profile-verification-text"></span>
+        </div>
+
+        <!-- AI Generated Profile Container (populated dynamically) -->
+        <div id="ai-generated-profile" class="dossier" style="margin-bottom: 24px;"></div>
+
+        <div class="dossier" id="dossier-content">
+            <!-- Profile Header -->
+            <header class="profile-header">
+                <div class="profile-avatar">RR</div>
+                <div class="profile-info">
+                    <h1 class="profile-name">Raghu Raghuram</h1>
+                    <p class="profile-role">Managing Partner & General Partner · AI Infrastructure & Growth · Andreessen Horowitz (a16z)</p>
+                    <div class="profile-links">
+                        <a href="https://www.linkedin.com/in/raghuraghuram/" target="_blank" class="profile-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                            LinkedIn
+                        </a>
+                        <a href="https://a16z.com/raghu-raghuram/" target="_blank" class="profile-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                            a16z
+                        </a>
+                        <a href="https://x.com/RaghuRaghuram" target="_blank" class="profile-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            Twitter/X
+                        </a>
+                        <a href="https://www.crunchbase.com/person/raghu-raghuram" target="_blank" class="profile-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            Crunchbase
+                        </a>
+                    </div>
+                    <div class="profile-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Investment Focus</div>
+                            <div class="meta-value">AI Infra · Enterprise · Growth</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Stage</div>
+                            <div class="meta-value">Seed → Growth</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Check Size</div>
+                            <div class="meta-value">$10M – $500M+ (a16z fund)</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Background -->
+            <h2>Background</h2>
+            <p><a href="https://www.linkedin.com/in/raghuraghuram/">Raghu Raghuram</a> is a Managing Partner and General Partner at <a href="https://a16z.com/">Andreessen Horowitz (a16z)</a>, where he serves on both the AI Infrastructure and Growth investing teams. He joined a16z in October 2025 after spending over two decades at VMware, where he rose from VP of Products to CEO, growing the company to $13.5B in revenue with 300,000+ customers across 60+ countries before shepherding the $69 billion acquisition by Broadcom — the largest software exit in history.</p>
+
+            <h3>Career Highlights</h3>
+            <ul>
+                <li><strong><a href="https://a16z.com/">Andreessen Horowitz (a16z)</a></strong>: Managing Partner + GP on AI Infra & Growth teams (2025-present). Serves as Ben Horowitz's consigliere helping run the firm.</li>
+                <li><strong><a href="https://www.vmware.com/">VMware</a></strong>: CEO (2021-2023), COO Products & Cloud Services, EVP & GM Software-Defined Datacenter, VP of Products. Led VMware from ~$40M to $13.5B revenue. Orchestrated the Nicira acquisition ($1.3B). Led company through $69B Broadcom acquisition.</li>
+                <li><strong>Netscape</strong>: Product Manager — hired by Ben Horowitz nearly 30 years ago. Rose to become top product manager.</li>
+                <li><strong>AOL & Bang Networks</strong>: Product management and marketing roles.</li>
+                <li><strong>Education</strong>: MBA from <a href="https://www.wharton.upenn.edu/">Wharton School, University of Pennsylvania</a> (1996); M.Tech Electrical Engineering from <a href="https://www.iitb.ac.in/">IIT Bombay</a> (1986); B.Tech Electrical Engineering from <a href="https://www.iitk.ac.in/">IIT Kanpur</a></li>
+            </ul>
+
+            <h3>What Makes Him Unique</h3>
+            <ul>
+                <li>Raghuram is arguably the most experienced enterprise infrastructure leader in venture capital. Ben Horowitz calls him "the greatest infrastructure strategist in the game" — having personally led a company from startup scale to $13.5B in revenue through every major platform shift: virtualization, cloud, containers, and now AI.</li>
+                <li>His unique triple role at a16z (Managing Partner + GP on two teams) signals the firm's conviction that AI infrastructure is the defining investment opportunity of this era.</li>
+                <li>His product management roots at Netscape give him founder-level empathy for the 0-to-1 journey, while his CEO experience at VMware gives him unmatched perspective on scaling from 1-to-100.</li>
+                <li>He co-hosts the "Mencyclopedia with Raghu & Rajiv" podcast, showing a personal side beyond enterprise software.</li>
+            </ul>
+
+            <!-- Investment Thesis -->
+            <h2>Investment Thesis & Key Ideas</h2>
+
+            <h3>Core Philosophy</h3>
+            <blockquote>
+                <p>"We're moving from a deterministic way of computing to a probabilistic way of computing. Everything from the foundation model down all the way to the power station is going to get reinvented."</p>
+                <cite>— Raghu Raghuram, a16z Podcast (October 2025)</cite>
+            </blockquote>
+
+            <h3>Key Concepts</h3>
+
+            <h4>1. "The Probabilistic Computing Paradigm"</h4>
+            <p>Computing is undergoing a fundamental shift from deterministic to probabilistic architectures. This isn't incremental — it's a full-stack reset that creates opportunities at every layer, from chips to applications. <a href="https://fortune.com/2025/10/12/ben-horowitz-raghu-raghuram-interview-ai-politics/">Source: Fortune interview, October 2025.</a></p>
+
+            <h4>2. "Reasoning Abundance"</h4>
+            <p>"Reasoning capability is going to become plentiful and very cheap over time." Just as cloud computing made compute abundant, AI will make reasoning abundant. Founders should build for a world where intelligence is a commodity, not a scarcity. <a href="https://fortune.com/2025/10/12/ben-horowitz-raghu-raghuram-interview-ai-politics/">Source: Fortune interview with Ben Horowitz.</a></p>
+
+            <h4>3. "Infrastructure Renaissance"</h4>
+            <p>"Some of the most important companies of tomorrow will be infrastructure companies." After 15 years of hyperscaler dominance, AI compute demands are so vast that even AWS, Google, and Azure can't keep pace — reopening the infrastructure market to new innovators. <a href="https://podcasts.apple.com/gb/podcast/raghu-raghuram-ai-robotics-and-the/id842818711?i=1000733675494">Source: a16z podcast.</a></p>
+
+            <h4>4. "Physical AI"</h4>
+            <p>Data center construction is 70-80% labor-intensive. Robotics applied to data center and manufacturing construction represents an immediate, valuable AI application. "The pathways to getting humanoid to work itself is very valuable because of all the ways you can use everything that comes along the way." <a href="https://podcasts.apple.com/gb/podcast/raghu-raghuram-ai-robotics-and-the/id842818711?i=1000733675494">Source: a16z podcast.</a></p>
+
+            <h4>5. "Culture as Operating System"</h4>
+            <p>Culture represents "how your employees work and collaborate when no one tells them how to work and collaborate." Codify culture explicitly before scaling — make it central to hiring, promotion, and termination decisions. <a href="https://a16z.com/raghu-raghuram-post-product-market-fit/">Source: a16z blog post.</a></p>
+
+            <h3>What They Look For</h3>
+            <ul>
+                <li>Infrastructure companies solving fundamental AI compute bottlenecks</li>
+                <li>Enterprise software companies leveraging AI for digital transformation</li>
+                <li>Companies building for "reasoning abundance" — making AI accessible at scale</li>
+                <li>Startups with deep technical innovation at the hardware or systems layer</li>
+                <li>Growth-stage companies ready to scale globally with sophisticated GTM</li>
+            </ul>
+
+            <h3>Anti-Patterns / What to Avoid</h3>
+            <ul>
+                <li>Application-layer-only companies without infrastructure differentiation</li>
+                <li>Companies that bolt AI onto existing products without rethinking architecture</li>
+                <li>Startups without a clear path to enterprise adoption</li>
+                <li>Companies that haven't codified culture before scaling</li>
+            </ul>
+
+            <!-- Portfolio -->
+            <h2>Portfolio Pattern Recognition</h2>
+
+            <h3>What ALL Raghuram's Focus Investments Share</h3>
+            <table>
+                <thead>
+                    <tr><th>Pattern</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Infrastructure-first</td><td>Solving foundational compute, networking, or data challenges</td></tr>
+                    <tr><td>Full-stack innovation</td><td>Innovation at hardware, systems, or architecture level — not just software wrappers</td></tr>
+                    <tr><td>Enterprise-ready</td><td>Built for the needs of large-scale deployments</td></tr>
+                    <tr><td>Platform potential</td><td>Can become foundational infrastructure others build on</td></tr>
+                    <tr><td>Technical depth</td><td>Deep technical moats that are hard to replicate</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Notable a16z Infrastructure Portfolio</h3>
+            <table>
+                <thead>
+                    <tr><th>Company</th><th>What It Does</th><th>Why Notable</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><a href="https://a16z.com/announcement/investing-in-unconventional/">Unconventional AI</a></td><td>Probabilistic chips for AI workloads</td><td>$475M seed co-led by Raghuram. Uses analog/mixed-signal designs.</td></tr>
+                    <tr><td><a href="https://www.databricks.com/">Databricks</a></td><td>Unified data analytics & AI platform</td><td>a16z Growth portfolio. Exemplifies data infrastructure at scale.</td></tr>
+                    <tr><td><a href="https://www.anyscale.com/">Anyscale</a></td><td>Ray distributed computing platform</td><td>a16z Infra. Simplifies scaling AI workloads.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>VMware Legacy — Raghuram's Infrastructure Track Record</h3>
+            <table>
+                <thead>
+                    <tr><th>Achievement</th><th>Details</th><th>Outcome</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>VMware CEO</td><td>Led company as independent public entity</td><td>$69B acquisition by Broadcom</td></tr>
+                    <tr><td>Nicira Acquisition</td><td>$1.3B for SDN startup</td><td>Became VMware NSX, killer security platform</td></tr>
+                    <tr><td>Multi-Cloud Strategy</td><td>Transformed VMware from on-prem to multi-cloud</td><td>$13.5B revenue, 300K+ customers</td></tr>
+                    <tr><td>Dell Spinout</td><td>Led VMware's spinout from Dell</td><td>Successfully operated as independent company</td></tr>
+                </tbody>
+            </table>
+
+            <!-- Recent Activity -->
+            <h2>Recent Activity (2024-2026)</h2>
+
+            <h3>Recent Investments at a16z</h3>
+            <ul>
+                <li><strong><a href="https://a16z.com/announcement/investing-in-unconventional/">Unconventional AI</a></strong> — $475M seed round (co-led by a16z, January 2026). Designs probabilistic chips for AI using analog/mixed-signal designs targeting O(1,000x) lower power consumption.</li>
+            </ul>
+
+            <h3>Podcasts</h3>
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Podcast</th><th>Key Topics</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Oct 2025</td><td><a href="https://podcasts.apple.com/gb/podcast/raghu-raghuram-ai-robotics-and-the/id842818711?i=1000733675494">a16z Show: "AI, Robotics, and the Rebirth of Infrastructure"</a></td><td>Early internet wars with Microsoft, VMware scaling to $13.5B, why AI is the biggest infrastructure reset since virtualization</td></tr>
+                    <tr><td>Dec 2024</td><td><a href="https://www.metisstrategy.com/interview/raghu-raghuram/">Technovation with Peter High</a></td><td>Future of multi-cloud computing, VMware's cloud transformation</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Articles</h3>
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Article</th><th>Key Themes</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Jan 2026</td><td><a href="https://a16z.com/announcement/investing-in-unconventional/">a16z: "Investing in Unconventional"</a></td><td>Hardware innovation for AI, probabilistic computing, analog chip design</td></tr>
+                    <tr><td>2025</td><td><a href="https://a16z.com/raghu-raghuram-post-product-market-fit/">a16z: "What VMware's former CEO says you should prioritize after product-market fit"</a></td><td>Culture, operating frameworks, GTM systematization</td></tr>
+                    <tr><td>Oct 2025</td><td><a href="https://fortune.com/2025/10/12/ben-horowitz-raghu-raghuram-interview-ai-politics/">Fortune: "Ben Horowitz and Raghu Raghuram on AI, politics"</a></td><td>Probabilistic computing paradigm, reasoning abundance, AI's impact on labor</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Current Focus:</strong> Heavily focused on AI infrastructure investments — from foundational hardware (probabilistic chips) to enterprise AI transformation to physical AI (robotics for manufacturing and data centers).</p>
+
+            <!-- Positioning -->
+            <h2>How to Position for This Investor</h2>
+
+            <h3>The Framework</h3>
+            <p>Position as an <strong>infrastructure company</strong> solving a fundamental bottleneck in the AI stack. Raghuram thinks in systems, not features — show him how your technology enables an ecosystem, not just an application. Demonstrate technical depth and enterprise readiness.</p>
+            <p>Key positioning elements:</p>
+            <ul>
+                <li>Infrastructure-level innovation (hardware, systems, architecture)</li>
+                <li>How your technology enables others to build on top</li>
+                <li>Enterprise deployment readiness and scalability</li>
+                <li>Technical moat that's hard to replicate</li>
+                <li>Global scaling potential</li>
+            </ul>
+
+            <h3>One-Liner Template</h3>
+            <blockquote>
+                <p>"We're building the [infrastructure layer] for [AI workload/enterprise need] — just as VMware became the foundational platform for virtualization, we're becoming the foundational platform for [your category]."</p>
+            </blockquote>
+
+            <h3>Why This Framework Works</h3>
+            <ol>
+                <li><strong>Infrastructure Strategist</strong> — Raghuram's entire career has been building infrastructure platforms</li>
+                <li><strong>Systems Thinking</strong> — He evaluates how technologies fit into the broader computing stack</li>
+                <li><strong>Enterprise Scale</strong> — He's seen what it takes to reach $13.5B in revenue and 300K+ customers</li>
+                <li><strong>Platform Potential</strong> — He backed companies like VMware that became platforms others build on</li>
+            </ol>
+
+            <!-- Portfolio Analogies -->
+            <h2>Key Portfolio Analogies to Use in Conversation</h2>
+
+            <p><strong>When discussing infrastructure innovation:</strong></p>
+            <blockquote>
+                <p>"Similar to how VMware virtualized compute and became a $69B company, we're virtualizing/abstracting [your infrastructure layer] to enable the next generation of [applications/workloads]."</p>
+            </blockquote>
+
+            <p><strong>When discussing AI hardware:</strong></p>
+            <blockquote>
+                <p>"Like <a href="https://a16z.com/announcement/investing-in-unconventional/">Unconventional AI</a> is rethinking chips for probabilistic computing, we're rethinking [component] for AI-native architectures — not just optimizing existing approaches."</p>
+            </blockquote>
+
+            <p><strong>When discussing enterprise scaling:</strong></p>
+            <blockquote>
+                <p>"We're following the VMware playbook — start with a core infrastructure product, prove it with technical users, then expand to adjacent use cases. VMware grew from virtualization to management, networking, storage, and security."</p>
+            </blockquote>
+
+            <p><strong>When discussing post-PMF growth:</strong></p>
+            <blockquote>
+                <p>"As <a href="https://a16z.com/raghu-raghuram-post-product-market-fit/">Raghu wrote</a>, the three priorities after product-market fit are culture, operating frameworks, and GTM systematization — and we've already codified all three as we scale from [current] to [target]."</p>
+            </blockquote>
+
+            <!-- Q&A -->
+            <h2>Anticipated Questions & Counters</h2>
+
+            <h3>Q1: "What's your technical moat? Why can't the hyperscalers build this?"</h3>
+            <p><strong>Why They Ask:</strong> Raghuram spent 20 years competing with and partnering alongside AWS, Azure, and GCP. He knows exactly what hyperscalers can and can't build.</p>
+            <p><strong>Counter:</strong> "The hyperscalers can't keep up with AI compute demand — that's why infrastructure is reopening to new players. Our moat is [specific technical innovation] at the [specific layer] that requires [years of R&D / specialized expertise / proprietary data]. We're complementary to hyperscalers, not competitive — similar to how VMware worked alongside AWS."</p>
+
+            <h3>Q2: "How do you go from technical innovation to enterprise adoption at scale?"</h3>
+            <p><strong>Why They Ask:</strong> He scaled VMware from $40M to $13.5B revenue and knows the enterprise GTM playbook cold.</p>
+            <p><strong>Counter:</strong> "Our GTM follows a bottoms-up adoption model — [technical users/developers] discover us, prove value in [use case], then we expand to enterprise accounts. We're at [current revenue/usage] with [growth metrics], and we've systematized our go-to-market with clear units of work, decision-making frameworks, and accountability mechanisms."</p>
+
+            <h3>Q3: "What happens when reasoning becomes commodity? How do you maintain value?"</h3>
+            <p><strong>Why They Ask:</strong> Raghuram believes "reasoning capability is going to become plentiful and very cheap over time" — so he's looking for companies that create value beyond the model layer.</p>
+            <p><strong>Counter:</strong> "We're building infrastructure, not models. As reasoning becomes abundant, the demand for [our infrastructure layer] actually increases. More models means more [compute / data / orchestration / deployment] needs. We benefit from reasoning abundance, we don't compete with it."</p>
+
+            <h3>Q4: "Walk me through your culture and operating framework."</h3>
+            <p><strong>Why They Ask:</strong> Raghuram wrote extensively about culture being the #1 priority after PMF. "Culture represents how your employees work and collaborate when no one tells them how to work and collaborate."</p>
+            <p><strong>Counter:</strong> "We've explicitly codified our culture around [core values]. Our operating framework defines [units of work, decision-making methods, communication protocols]. We learned from VMware's model — they prioritized 'solve the damn problem' and 'GSD: get shit done' mentalities, and we've built similar frameworks at [your stage]."</p>
+
+            <h3>Q5: "How does this fit into the broader AI infrastructure stack?"</h3>
+            <p><strong>Why They Ask:</strong> Raghuram thinks in terms of full-stack systems — from power stations to foundation models. He wants to understand where you sit and what you enable.</p>
+            <p><strong>Counter:</strong> "We sit at the [specific layer] of the AI infrastructure stack. Below us is [layer below], above us is [layer above]. We're the critical connection point for [specific function]. This is similar to how VMware sat between hardware and applications — we're the new abstraction layer for [AI workloads]."</p>
+
+            <!-- Meeting Prep -->
+            <h2>Meeting Prep Checklist</h2>
+
+            <h3>Technical Deep-Dive</h3>
+            <ul class="checklist">
+                <li>Architecture diagram showing where you sit in the AI infrastructure stack</li>
+                <li>Technical differentiation vs. hyperscaler alternatives</li>
+                <li>Performance benchmarks and scalability metrics</li>
+                <li>Hardware/systems innovation details (if applicable)</li>
+                <li>Multi-cloud and deployment flexibility</li>
+            </ul>
+
+            <h3>Enterprise Readiness</h3>
+            <ul class="checklist">
+                <li>Current enterprise customers and deployment scale</li>
+                <li>Enterprise sales cycle and bottoms-up adoption metrics</li>
+                <li>Security, compliance, and reliability guarantees</li>
+                <li>Integration with existing enterprise infrastructure</li>
+            </ul>
+
+            <h3>Growth Metrics</h3>
+            <ul class="checklist">
+                <li>Revenue growth trajectory</li>
+                <li>Customer acquisition costs and expansion revenue</li>
+                <li>Path to VMware-scale ($1B+) with detailed milestones</li>
+                <li>Geographic expansion strategy</li>
+            </ul>
+
+            <h3>Culture & Operations</h3>
+            <ul class="checklist">
+                <li>How culture is codified and enforced</li>
+                <li>Operating framework at current scale</li>
+                <li>GTM systematization approach</li>
+                <li>Hiring and scaling plan</li>
+            </ul>
+
+            <h3>The Ask</h3>
+            <ul class="checklist">
+                <li>Clear use of funds aligned with infrastructure scaling</li>
+                <li>Milestones this capital achieves</li>
+                <li>Why a16z specifically — reference their AI infra thesis</li>
+                <li>How Raghuram's VMware scaling experience helps</li>
+            </ul>
+
+            <!-- Contact -->
+            <h2>Contact & Links</h2>
+            <table>
+                <tbody>
+                    <tr><td><strong>LinkedIn</strong></td><td><a href="https://www.linkedin.com/in/raghuraghuram/">linkedin.com/in/raghuraghuram/</a></td></tr>
+                    <tr><td><strong>a16z Profile</strong></td><td><a href="https://a16z.com/raghu-raghuram/">a16z.com/raghu-raghuram/</a></td></tr>
+                    <tr><td><strong>Twitter/X</strong></td><td><a href="https://x.com/RaghuRaghuram">x.com/RaghuRaghuram</a></td></tr>
+                    <tr><td><strong>Crunchbase</strong></td><td><a href="https://www.crunchbase.com/person/raghu-raghuram">crunchbase.com/person/raghu-raghuram</a></td></tr>
+                    <tr><td><strong>a16z Infra Team</strong></td><td><a href="https://a16z.com/infra/">a16z.com/infra/</a></td></tr>
+                </tbody>
+            </table>
+
+            <!-- Company Positioning Section -->
+            <h2>Company Positioning Analysis</h2>
+            <p class="section-intro">Upload your company briefing to generate personalized positioning recommendations for this investor.</p>
+
+            <div id="positioning-container">
+                <!-- Upload State -->
+                <div id="positioning-upload" class="positioning-state">
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                        </div>
+                        <p class="upload-text">Drag and drop your company briefing here</p>
+                        <p class="upload-subtext">or click to browse (PDF or DOCX, max 10MB)</p>
+                        <input type="file" id="file-input" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+                    </div>
+                    <div class="upload-form" id="upload-form" style="display: none;">
+                        <div class="file-preview">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span id="file-name"></span>
+                            <button type="button" class="btn-remove" id="btn-remove-file">Remove</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="company-name">Company Name</label>
+                            <input type="text" id="company-name" placeholder="Enter your company name" required>
+                        </div>
+                        <button type="button" class="btn-primary btn-upload" id="btn-upload">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            Upload & Analyze
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analyzing State -->
+                <div id="positioning-analyzing" class="positioning-state" style="display: none;">
+                    <div class="analyzing-container">
+                        <div class="spinner"></div>
+                        <p class="analyzing-text" id="analyzing-text">Uploading briefing...</p>
+                        <p class="analyzing-subtext">This may take a minute while we analyze your company against the investor's thesis.</p>
+                    </div>
+                </div>
+
+                <!-- Results State -->
+                <div id="positioning-results" class="positioning-state" style="display: none;">
+                    <div class="results-header">
+                        <div class="results-meta">
+                            <span class="company-badge" id="result-company-name"></span>
+                            <span class="file-badge" id="result-filename"></span>
+                        </div>
+                        <div class="results-actions">
+                            <button type="button" class="btn-secondary" id="btn-regenerate">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Regenerate
+                            </button>
+                            <button type="button" class="btn-secondary" id="btn-replace">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                Replace Briefing
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Alignment Score -->
+                    <div class="score-card">
+                        <div class="score-circle" id="score-circle">
+                            <span class="score-value" id="score-value">--</span>
+                        </div>
+                        <div class="score-info">
+                            <h4>Alignment Score</h4>
+                            <p id="score-rationale"></p>
+                        </div>
+                    </div>
+
+                    <!-- Verification Status Banner -->
+                    <div id="verification-banner" class="verification-banner" style="display: none;">
+                        <svg id="verification-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span id="verification-text">All claims verified against investor portfolio data.</span>
+                    </div>
+                    <!-- Verification Warnings Detail -->
+                    <div id="verification-warnings" class="verification-warnings" style="display: none;"></div>
+
+                    <!-- Executive Summary -->
+                    <div class="result-section">
+                        <h4>Executive Summary</h4>
+                        <p id="executive-summary"></p>
+                    </div>
+
+                    <!-- Pitch Recommendations -->
+                    <div class="result-section">
+                        <h4>Recommended One-Liner</h4>
+                        <blockquote id="one-liner"></blockquote>
+
+                        <h4>Opening Hook</h4>
+                        <p id="opening-hook"></p>
+
+                        <h4>Key Messages to Emphasize</h4>
+                        <ul id="key-messages"></ul>
+                    </div>
+
+                    <!-- Key Alignments -->
+                    <div class="result-section">
+                        <h4>Key Alignments</h4>
+                        <div id="key-alignments"></div>
+                    </div>
+
+                    <!-- Portfolio Analogies -->
+                    <div class="result-section">
+                        <h4>Portfolio Analogies to Use</h4>
+                        <div id="portfolio-analogies"></div>
+                    </div>
+
+                    <!-- Potential Concerns -->
+                    <div class="result-section">
+                        <h4>Potential Concerns & Mitigations</h4>
+                        <div id="potential-concerns"></div>
+                    </div>
+
+                    <!-- Language Guidance -->
+                    <div class="result-section">
+                        <h4>Language Guidance</h4>
+                        <div class="language-grid">
+                            <div class="language-col">
+                                <h5 class="label-use">Terms to Use</h5>
+                                <div id="terms-to-use" class="tag-list"></div>
+                            </div>
+                            <div class="language-col">
+                                <h5 class="label-avoid">Terms to Avoid</h5>
+                                <div id="terms-to-avoid" class="tag-list"></div>
+                            </div>
+                        </div>
+                        <h5>Framing Tips</h5>
+                        <ul id="framing-tips"></ul>
+                    </div>
+
+                    <!-- Anticipated Questions -->
+                    <div class="result-section">
+                        <h4>Anticipated Questions</h4>
+                        <div id="anticipated-questions"></div>
+                    </div>
+
+                    <!-- Next Steps -->
+                    <div class="result-section">
+                        <h4>Recommended Next Steps</h4>
+                        <ul id="next-steps" class="checklist"></ul>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="positioning-error" class="positioning-state" style="display: none;">
+                    <div class="error-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="error-text" id="error-text">An error occurred</p>
+                        <button type="button" class="btn-primary" id="btn-try-again">Try Again</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sources -->
+            <h2>Research Sources</h2>
+            <ul>
+                <li><a href="https://a16z.com/raghu-raghuram/">a16z — Raghu Raghuram Profile</a></li>
+                <li><a href="https://a16z.com/announcement/investing-in-unconventional/">a16z — Investing in Unconventional</a></li>
+                <li><a href="https://a16z.com/raghu-raghuram-post-product-market-fit/">a16z — What VMware's former CEO says you should prioritize after PMF</a></li>
+                <li><a href="https://fortune.com/2025/10/12/ben-horowitz-raghu-raghuram-interview-ai-politics/">Fortune — Ben Horowitz and Raghu Raghuram on AI, politics</a></li>
+                <li><a href="https://www.axios.com/2025/10/09/vmware-ceo-raghuram-andreessen-horowitz">Axios — Andreessen Horowitz hires ex-VMware CEO Raghuram</a></li>
+                <li><a href="https://acr.iitbombay.org/awards/mr-rangarajan-raghu-raghuram/">IIT Bombay — Mr. Rangarajan (Raghu) Raghuram</a></li>
+                <li><a href="https://www.crunchbase.com/person/raghu-raghuram">Crunchbase — Raghu Raghuram</a></li>
+                <li><a href="https://podcasts.apple.com/gb/podcast/raghu-raghuram-ai-robotics-and-the/id842818711?i=1000733675494">a16z Podcast — AI, Robotics, and the Rebirth of Infrastructure</a></li>
+            </ul>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        // Wrap tables in scrollable containers for mobile
+        document.querySelectorAll('table').forEach(table => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-scroll';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        });
+
+        function downloadPDF() {
+            const element = document.getElementById('dossier-content');
+            const btn = document.querySelector('.btn-download');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="animation: spin 1s linear infinite;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Generating...';
+            btn.disabled = true;
+
+            const uploadState = document.getElementById('positioning-upload');
+            const analyzingState = document.getElementById('positioning-analyzing');
+            const errorState = document.getElementById('positioning-error');
+            const resultsState = document.getElementById('positioning-results');
+            const resultsActions = document.querySelector('.results-actions');
+
+            const uploadDisplay = uploadState.style.display;
+            const analyzingDisplay = analyzingState.style.display;
+            const errorDisplay = errorState.style.display;
+
+            uploadState.style.display = 'none';
+            analyzingState.style.display = 'none';
+            errorState.style.display = 'none';
+            if (resultsActions) resultsActions.style.display = 'none';
+
+            element.classList.add('pdf-rendering');
+
+            const opt = {
+                margin: [10, 15, 10, 15],
+                filename: 'Raghu-Raghuram-Investor-Dossier.pdf',
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight,
+                    onclone: function(clonedDoc) {
+                        const clonedElement = clonedDoc.getElementById('dossier-content');
+                        if (clonedElement) {
+                            clonedElement.style.height = 'auto';
+                            clonedElement.style.overflow = 'visible';
+                        }
+                    }
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: {
+                    mode: ['css', 'legacy'],
+                    before: '.page-break-before',
+                    after: '.page-break-after',
+                    avoid: ['tr', 'blockquote', 'h2', 'h3', 'h4', 'h5', 'li', '.alignment-card', '.concern-card', '.question-card', '.analogy-card', '.score-card', '.score-info', '.result-section', '.language-grid', '.tag-list', '.mitigation', '.response']
+                }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                element.classList.remove('pdf-rendering');
+                uploadState.style.display = uploadDisplay;
+                analyzingState.style.display = analyzingDisplay;
+                errorState.style.display = errorDisplay;
+                if (resultsActions) resultsActions.style.display = '';
+            }).catch(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                element.classList.remove('pdf-rendering');
+                uploadState.style.display = uploadDisplay;
+                analyzingState.style.display = analyzingDisplay;
+                errorState.style.display = errorDisplay;
+                if (resultsActions) resultsActions.style.display = '';
+                window.print();
+            });
+        }
+    </script>
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media print { .toolbar { display: none !important; } }
+    </style>
+
+    <script>
+    // Profile Regeneration Feature with Source Citations
+    const PROFILE_INVESTOR_SLUG = 'raghu-raghuram';
+    let collectedSources = [];
+    let sourceIndex = 0;
+
+    function showRegenerateModal() {
+        document.getElementById('regenerate-modal').style.display = 'flex';
+    }
+
+    function hideRegenerateModal() {
+        document.getElementById('regenerate-modal').style.display = 'none';
+    }
+
+    // Create a source citation link
+    function createSourceCitation(source, claimText) {
+        if (!source || source === 'null' || source === null) {
+            return '';
+        }
+
+        sourceIndex++;
+        const currentIndex = sourceIndex;
+
+        // Extract domain from URL
+        let domain = '';
+        try {
+            const url = new URL(source);
+            domain = url.hostname.replace('www.', '');
+        } catch {
+            domain = 'unknown';
+        }
+
+        // Add to collected sources if not already there
+        const existingSource = collectedSources.find(s => s.url === source);
+        if (!existingSource) {
+            collectedSources.push({
+                index: currentIndex,
+                url: source,
+                domain: domain,
+                usedFor: [claimText]
+            });
+        } else {
+            existingSource.usedFor.push(claimText);
+            return `<a href="${escapeHtmlProfile(source)}" target="_blank" class="source-indicator" title="${escapeHtmlProfile(domain)}">${existingSource.index}</a>`;
+        }
+
+        return `<a href="${escapeHtmlProfile(source)}" target="_blank" class="source-indicator" title="${escapeHtmlProfile(domain)}">${currentIndex}</a>`;
+    }
+
+    // Render text with inline source link
+    function renderWithSource(text, source, claimDescription) {
+        const citation = createSourceCitation(source, claimDescription || text);
+        return `${escapeHtmlProfile(text)}${citation}`;
+    }
+
+    // Render the AI-generated profile
+    function renderAIProfile(profile, verification) {
+        // Reset source tracking
+        collectedSources = [];
+        sourceIndex = 0;
+
+        let html = `
+            <div class="ai-profile-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                AI-Generated Profile with Source Citations
+            </div>
+        `;
+
+        // Source Coverage Stats
+        if (verification?.sourceStats) {
+            const stats = verification.sourceStats;
+            html += `
+                <div class="source-stats">
+                    <div class="source-stat">
+                        <div class="source-stat-value">${stats.sourceCoveragePercent || 0}%</div>
+                        <div class="source-stat-label">Source Coverage</div>
+                    </div>
+                    <div class="source-stat">
+                        <div class="source-stat-value">${stats.uniqueSourceCount || 0}</div>
+                        <div class="source-stat-label">Unique Sources</div>
+                    </div>
+                    <div class="source-stat">
+                        <div class="source-stat-value">${stats.claimsWithTrustedSources || 0}</div>
+                        <div class="source-stat-label">Trusted Sources</div>
+                    </div>
+                    <div class="source-stat">
+                        <div class="source-stat-value">${stats.claimsWithoutSources || 0}</div>
+                        <div class="source-stat-label">Missing Sources</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Background Section
+        if (profile.background) {
+            html += `<h2>Background</h2>`;
+            if (profile.background.summary) {
+                html += `<p>${renderWithSource(profile.background.summary, profile.background.summarySource, 'Background summary')}</p>`;
+            }
+
+            // Career Highlights
+            if (profile.background.careerHighlights?.length > 0) {
+                html += `<h3>Career Highlights</h3><ul>`;
+                profile.background.careerHighlights.forEach(item => {
+                    const desc = item.period
+                        ? `<strong>${escapeHtmlProfile(item.company)}</strong>: ${escapeHtmlProfile(item.role)} (${escapeHtmlProfile(item.period)}) — ${escapeHtmlProfile(item.description)}`
+                        : `<strong>${escapeHtmlProfile(item.company)}</strong>: ${escapeHtmlProfile(item.role)} — ${escapeHtmlProfile(item.description)}`;
+                    html += `<li>${desc}${createSourceCitation(item.source, `${item.role} at ${item.company}`)}</li>`;
+                });
+                html += `</ul>`;
+            }
+
+            // Education
+            if (profile.background.education?.length > 0) {
+                html += `<h3>Education</h3><ul>`;
+                profile.background.education.forEach(item => {
+                    const edu = item.year
+                        ? `<strong>${escapeHtmlProfile(item.institution)}</strong>: ${escapeHtmlProfile(item.degree || '')} ${escapeHtmlProfile(item.field || '')} (${escapeHtmlProfile(item.year)})`
+                        : `<strong>${escapeHtmlProfile(item.institution)}</strong>: ${escapeHtmlProfile(item.degree || '')} ${escapeHtmlProfile(item.field || '')}`;
+                    html += `<li>${edu}${createSourceCitation(item.source, `Education at ${item.institution}`)}</li>`;
+                });
+                html += `</ul>`;
+            }
+
+            // Unique Traits
+            if (profile.background.uniqueTraits?.length > 0) {
+                html += `<h3>What Makes Them Unique</h3><ul>`;
+                profile.background.uniqueTraits.forEach(item => {
+                    if (typeof item === 'object' && item.trait) {
+                        html += `<li>${renderWithSource(item.trait, item.source, item.trait)}</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>${escapeHtmlProfile(item)}</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+        }
+
+        // Investment Thesis Section
+        if (profile.investmentThesis) {
+            html += `<h2>Investment Thesis & Key Ideas</h2>`;
+
+            if (profile.investmentThesis.corePhilosophy) {
+                html += `<h3>Core Philosophy</h3>`;
+                html += `<p><em>${renderWithSource(profile.investmentThesis.corePhilosophy, profile.investmentThesis.philosophySource, 'Core philosophy')}</em></p>`;
+            }
+
+            // Key Concepts
+            if (profile.investmentThesis.keyConcepts?.length > 0) {
+                html += `<h3>Key Concepts</h3>`;
+                profile.investmentThesis.keyConcepts.forEach((concept, idx) => {
+                    html += `<h4>${idx + 1}. "${escapeHtmlProfile(concept.name)}"</h4>`;
+                    html += `<p>${renderWithSource(concept.description, concept.source, concept.name)}</p>`;
+                });
+            }
+
+            // Investment Patterns
+            if (profile.investmentThesis.patterns?.length > 0) {
+                html += `<h3>What They Look For</h3><ul>`;
+                profile.investmentThesis.patterns.forEach(item => {
+                    if (typeof item === 'object' && item.pattern) {
+                        html += `<li>${renderWithSource(item.pattern, item.source, item.pattern)}</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>${escapeHtmlProfile(item)}</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+        }
+
+        // Portfolio Section
+        if (profile.portfolio) {
+            html += `<h2>Portfolio</h2>`;
+
+            // Notable Investments
+            if (profile.portfolio.notableInvestments?.length > 0) {
+                html += `<h3>Notable Investments</h3>`;
+                html += `<table><thead><tr><th>Company</th><th>Description</th><th>Stage</th><th>Role</th></tr></thead><tbody>`;
+                profile.portfolio.notableInvestments.forEach(inv => {
+                    html += `<tr>
+                        <td><strong>${escapeHtmlProfile(inv.name)}</strong>${createSourceCitation(inv.source, `Investment in ${inv.name}`)}</td>
+                        <td>${escapeHtmlProfile(inv.description || '')}</td>
+                        <td>${escapeHtmlProfile(inv.stage || '—')}</td>
+                        <td>${escapeHtmlProfile(inv.role || '—')}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+
+            // Recent Investments
+            if (profile.portfolio.recentInvestments?.length > 0) {
+                html += `<h3>Recent Investments</h3>`;
+                html += `<table><thead><tr><th>Company</th><th>Description</th><th>Date</th><th>Details</th></tr></thead><tbody>`;
+                profile.portfolio.recentInvestments.forEach(inv => {
+                    const details = [inv.amount, inv.valuation].filter(Boolean).join(' at ') || '—';
+                    html += `<tr>
+                        <td><strong>${escapeHtmlProfile(inv.name)}</strong>${createSourceCitation(inv.source, `Recent investment in ${inv.name}`)}</td>
+                        <td>${escapeHtmlProfile(inv.description || '')}</td>
+                        <td>${escapeHtmlProfile(inv.date || '—')}</td>
+                        <td>${escapeHtmlProfile(details)}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+
+            // Historic Exits
+            if (profile.portfolio.historicExits?.length > 0) {
+                html += `<h3>Historic Exits</h3>`;
+                html += `<table><thead><tr><th>Company</th><th>Description</th><th>Outcome</th></tr></thead><tbody>`;
+                profile.portfolio.historicExits.forEach(exit => {
+                    const outcome = exit.exitValue ? `${exit.outcome} (${exit.exitValue})` : exit.outcome;
+                    html += `<tr>
+                        <td><strong>${escapeHtmlProfile(exit.name)}</strong>${createSourceCitation(exit.source, `Exit: ${exit.name}`)}</td>
+                        <td>${escapeHtmlProfile(exit.description || '')}</td>
+                        <td>${escapeHtmlProfile(outcome || '—')}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+        }
+
+        // Recent Activity Section
+        if (profile.recentActivity) {
+            html += `<h2>Recent Activity</h2>`;
+
+            // Speaking
+            if (profile.recentActivity.speaking?.length > 0) {
+                html += `<h3>Speaking Engagements</h3>`;
+                html += `<table><thead><tr><th>Event</th><th>Topic</th><th>Date</th></tr></thead><tbody>`;
+                profile.recentActivity.speaking.forEach(item => {
+                    html += `<tr>
+                        <td>${item.source ? `<a href="${escapeHtmlProfile(item.source)}" target="_blank">${escapeHtmlProfile(item.event)}</a>` : escapeHtmlProfile(item.event)}</td>
+                        <td>${escapeHtmlProfile(item.topic || '')}</td>
+                        <td>${escapeHtmlProfile(item.date || '—')}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+
+            // Writing
+            if (profile.recentActivity.writing?.length > 0) {
+                html += `<h3>Writing & Publications</h3><ul>`;
+                profile.recentActivity.writing.forEach(item => {
+                    const title = item.source
+                        ? `<a href="${escapeHtmlProfile(item.source)}" target="_blank">${escapeHtmlProfile(item.title)}</a>`
+                        : escapeHtmlProfile(item.title);
+                    html += `<li><strong>${title}</strong> (${escapeHtmlProfile(item.date || 'Recent')}) — ${escapeHtmlProfile(item.topic || '')}</li>`;
+                });
+                html += `</ul>`;
+            }
+        }
+
+        // Engagement Section
+        if (profile.engagement) {
+            html += `<h2>How to Engage</h2>`;
+
+            if (profile.engagement.doList?.length > 0) {
+                html += `<h3>Do</h3><ul>`;
+                profile.engagement.doList.forEach(item => {
+                    if (typeof item === 'object' && item.tip) {
+                        html += `<li>${renderWithSource(item.tip, item.source, item.tip)}</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>${escapeHtmlProfile(item)}</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+
+            if (profile.engagement.dontList?.length > 0) {
+                html += `<h3>Don't</h3><ul>`;
+                profile.engagement.dontList.forEach(item => {
+                    if (typeof item === 'object' && item.tip) {
+                        html += `<li>${renderWithSource(item.tip, item.source, item.tip)}</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>${escapeHtmlProfile(item)}</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+
+            if (profile.engagement.questionsTheyAsk?.length > 0) {
+                html += `<h3>Questions They Typically Ask</h3><ul>`;
+                profile.engagement.questionsTheyAsk.forEach(item => {
+                    if (typeof item === 'object' && item.question) {
+                        html += `<li>"${renderWithSource(item.question, item.source, item.question)}"</li>`;
+                    } else if (typeof item === 'string') {
+                        html += `<li>"${escapeHtmlProfile(item)}"</li>`;
+                    }
+                });
+                html += `</ul>`;
+            }
+        }
+
+        // Sources Section
+        if (collectedSources.length > 0) {
+            html += `
+                <div class="sources-section">
+                    <h2>Sources</h2>
+                    <p class="section-intro">All sources used in this AI-generated profile. Click citation numbers above to jump to the source.</p>
+                    <div class="sources-list">
+            `;
+
+            collectedSources.forEach(source => {
+                html += `
+                    <div class="source-item" id="source-${source.index}">
+                        <div class="source-number">${source.index}</div>
+                        <div class="source-details">
+                            <div class="source-domain">${escapeHtmlProfile(source.domain)}</div>
+                            <a href="${escapeHtmlProfile(source.url)}" target="_blank" class="source-url">${escapeHtmlProfile(source.url)}</a>
+                            <div class="source-used-for">Used for: ${source.usedFor.slice(0, 3).map(u => escapeHtmlProfile(u)).join(', ')}${source.usedFor.length > 3 ? ` and ${source.usedFor.length - 3} more` : ''}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+        }
+
+        return html;
+    }
+
+    async function regenerateProfile() {
+        hideRegenerateModal();
+
+        const statusOverlay = document.getElementById('profile-status');
+        const statusText = document.getElementById('profile-status-text');
+        const verificationBanner = document.getElementById('profile-verification-banner');
+        const verificationIcon = document.getElementById('profile-verification-icon');
+        const verificationText = document.getElementById('profile-verification-text');
+
+        // Show loading state
+        statusOverlay.style.display = 'flex';
+        statusText.textContent = 'Regenerating investor profile with sources... This may take 1-2 minutes.';
+
+        try {
+            const response = await fetch('/api/regenerate-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ investorSlug: PROFILE_INVESTOR_SLUG })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to regenerate profile');
+            }
+
+            const data = await response.json();
+
+            // Hide loading overlay
+            statusOverlay.style.display = 'none';
+
+            // Display verification status
+            verificationBanner.style.display = 'flex';
+            const verification = data.verification || {};
+
+            if (verification.isValid) {
+                verificationBanner.className = 'verification-banner passed';
+                verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                const coverage = verification.sourceStats?.sourceCoveragePercent || 0;
+                verificationText.textContent = `Profile regenerated with ${coverage}% source coverage. ${verification.sourceStats?.uniqueSourceCount || 0} unique sources.`;
+            } else if (verification.summary && verification.summary.highSeverity > 0) {
+                verificationBanner.className = 'verification-banner flagged';
+                verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                verificationText.textContent = `Profile regenerated with ${verification.summary.highSeverity} unverified claim(s). Review sources carefully.`;
+            } else {
+                verificationBanner.className = 'verification-banner warning';
+                verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />';
+                const coverage = verification.sourceStats?.sourceCoveragePercent || 0;
+                verificationText.textContent = `Profile regenerated with ${coverage}% source coverage. Some claims may need verification.`;
+            }
+
+            // Update the last updated date
+            const lastUpdated = document.getElementById('last-updated');
+            if (lastUpdated && data.generatedAt) {
+                const date = new Date(data.generatedAt);
+                lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+            }
+
+            // Profile stored successfully - static profile remains visible
+
+        } catch (err) {
+            console.error('Profile regeneration error:', err);
+            statusOverlay.style.display = 'none';
+
+            verificationBanner.style.display = 'flex';
+            verificationBanner.className = 'verification-banner flagged';
+            verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+            verificationText.textContent = `Error: ${err.message || 'Failed to regenerate profile. Please try again.'}`;
+        }
+    }
+
+    function displayProfileVerificationWarnings(warnings) {
+        let warningsContainer = document.getElementById('profile-warnings-container');
+        if (!warningsContainer) {
+            warningsContainer = document.createElement('div');
+            warningsContainer.id = 'profile-warnings-container';
+            warningsContainer.className = 'verification-warnings';
+            warningsContainer.style.margin = '16px 24px';
+            const banner = document.getElementById('profile-verification-banner');
+            banner.parentNode.insertBefore(warningsContainer, banner.nextSibling);
+        }
+
+        const highSeverity = warnings.filter(w => w.severity === 'high');
+        const mediumSeverity = warnings.filter(w => w.severity === 'medium');
+
+        let html = '<h5>⚠️ Profile Verification Warnings</h5>';
+
+        if (highSeverity.length > 0) {
+            html += '<div style="margin-bottom: 12px;"><strong>High Severity (Unverified Companies):</strong></div>';
+            html += highSeverity.map(w => `
+                <div class="verification-warning-item high">
+                    <span class="field">${escapeHtmlProfile(w.field)}:</span>
+                    <span class="message">${escapeHtmlProfile(w.message)}</span>
+                </div>
+            `).join('');
+        }
+
+        if (mediumSeverity.length > 0) {
+            html += '<div style="margin-bottom: 12px; margin-top: 12px;"><strong>Medium Severity (Missing Sources):</strong></div>';
+            html += mediumSeverity.map(w => `
+                <div class="verification-warning-item medium">
+                    <span class="field">${escapeHtmlProfile(w.field)}:</span>
+                    <span class="message">${escapeHtmlProfile(w.message)}</span>
+                </div>
+            `).join('');
+        }
+
+        warningsContainer.innerHTML = html;
+        warningsContainer.style.display = 'block';
+    }
+
+    function escapeHtmlProfile(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Check for stored profile on page load
+    async function checkStoredProfile() {
+        try {
+            const response = await fetch(`/api/get-profile?investorSlug=${PROFILE_INVESTOR_SLUG}`);
+            const data = await response.json();
+
+            if (data.success && data.hasStoredProfile && data.generatedAt) {
+                // Update the last updated date
+                const lastUpdated = document.getElementById('last-updated');
+                if (lastUpdated) {
+                    const date = new Date(data.generatedAt);
+                    lastUpdated.textContent = `Last updated: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+                }
+
+                // Show verification banner if available
+                if (data.verification) {
+                    const verificationBanner = document.getElementById('profile-verification-banner');
+                    const verificationText = document.getElementById('profile-verification-text');
+                    const verificationIcon = document.getElementById('profile-verification-icon');
+
+                    verificationBanner.style.display = 'flex';
+                    const coverage = data.verification.sourceStats?.sourceCoveragePercent || 0;
+
+                    if (data.verification.isValid) {
+                        verificationBanner.className = 'verification-banner passed';
+                        verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                        verificationText.textContent = `Profile verified with ${coverage}% source coverage.`;
+                    } else {
+                        verificationBanner.className = 'verification-banner warning';
+                        verificationIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />';
+                        verificationText.textContent = `Profile has ${coverage}% source coverage. Some claims may need verification.`;
+                    }
+                }
+            }
+        } catch (err) {
+            console.log('No stored profile found or error checking:', err);
+        }
+    }
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', checkStoredProfile);
+    </script>
+
+    <script>
+    // Company Positioning Feature
+    (function() {
+        const INVESTOR_SLUG = 'raghu-raghuram';
+
+        // DOM Elements
+        const uploadState = document.getElementById('positioning-upload');
+        const analyzingState = document.getElementById('positioning-analyzing');
+        const resultsState = document.getElementById('positioning-results');
+        const errorState = document.getElementById('positioning-error');
+
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadForm = document.getElementById('upload-form');
+        const fileNameEl = document.getElementById('file-name');
+        const companyNameInput = document.getElementById('company-name');
+
+        const btnRemoveFile = document.getElementById('btn-remove-file');
+        const btnUpload = document.getElementById('btn-upload');
+        const btnRegenerate = document.getElementById('btn-regenerate');
+        const btnReplace = document.getElementById('btn-replace');
+        const btnTryAgain = document.getElementById('btn-try-again');
+
+        const analyzingText = document.getElementById('analyzing-text');
+        const errorText = document.getElementById('error-text');
+
+        let selectedFile = null;
+        let currentBriefingId = null;
+
+        function showState(state) {
+            [uploadState, analyzingState, resultsState, errorState].forEach(el => {
+                el.style.display = 'none';
+            });
+            state.style.display = 'block';
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            showState(errorState);
+        }
+
+        async function checkExistingBriefing() {
+            try {
+                const res = await fetch(`/api/get-positioning?investorSlug=${INVESTOR_SLUG}`);
+                const data = await res.json();
+
+                if (data.success && data.hasBriefing && data.analysis) {
+                    currentBriefingId = data.briefing.id;
+                    displayResults(data.briefing, data.analysis, data.verification);
+                }
+            } catch (err) {
+                console.log('No existing briefing found');
+            }
+        }
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            const validTypes = [
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ];
+            const validExtensions = ['.pdf', '.docx'];
+            const extension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+
+            if (!validTypes.includes(file.type) && !validExtensions.includes(extension)) {
+                alert('Please select a PDF or DOCX file.');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File too large. Maximum size is 10MB.');
+                return;
+            }
+
+            selectedFile = file;
+            fileNameEl.textContent = file.name;
+            uploadForm.style.display = 'block';
+        }
+
+        btnRemoveFile.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            uploadForm.style.display = 'none';
+            companyNameInput.value = '';
+        });
+
+        btnUpload.addEventListener('click', async () => {
+            if (!selectedFile) {
+                alert('Please select a file.');
+                return;
+            }
+
+            const companyName = companyNameInput.value.trim();
+            if (!companyName) {
+                alert('Please enter your company name.');
+                companyNameInput.focus();
+                return;
+            }
+
+            await uploadAndAnalyze(selectedFile, companyName);
+        });
+
+        async function uploadAndAnalyze(file, companyName) {
+            showState(analyzingState);
+            analyzingText.textContent = 'Uploading briefing...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('companyName', companyName);
+                formData.append('investorSlug', INVESTOR_SLUG);
+
+                const uploadRes = await fetch('/api/upload-briefing', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadRes.ok) {
+                    const error = await uploadRes.json();
+                    throw new Error(error.error || 'Upload failed');
+                }
+
+                const uploadData = await uploadRes.json();
+                currentBriefingId = uploadData.briefingId;
+
+                analyzingText.textContent = 'Analyzing positioning against investor thesis...';
+
+                const analyzeRes = await fetch('/api/analyze-positioning', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        briefingId: currentBriefingId,
+                        investorSlug: INVESTOR_SLUG
+                    })
+                });
+
+                if (!analyzeRes.ok) {
+                    const error = await analyzeRes.json();
+                    throw new Error(error.error || 'Analysis failed');
+                }
+
+                const analyzeData = await analyzeRes.json();
+
+                displayResults({
+                    companyName,
+                    filename: file.name
+                }, analyzeData.analysis, analyzeData.verification);
+
+            } catch (err) {
+                console.error('Error:', err);
+                showError(err.message || 'An error occurred. Please try again.');
+            }
+        }
+
+        function displayResults(briefing, analysis, verification) {
+            document.getElementById('result-company-name').textContent = briefing.companyName;
+            document.getElementById('result-filename').textContent = briefing.filename;
+
+            const score = analysis.alignmentScore || 0;
+            document.getElementById('score-value').textContent = score;
+            document.getElementById('score-rationale').textContent = analysis.alignmentRationale || '';
+
+            const scoreCircle = document.getElementById('score-circle');
+            if (score >= 70) {
+                scoreCircle.style.background = 'linear-gradient(135deg, #dcfce7, #bbf7d0)';
+            } else if (score >= 40) {
+                scoreCircle.style.background = 'linear-gradient(135deg, #fef9c3, #fde68a)';
+            } else {
+                scoreCircle.style.background = 'linear-gradient(135deg, #fee2e2, #fecaca)';
+            }
+
+            // Display verification banner
+            displayVerificationBanner(verification);
+
+            document.getElementById('executive-summary').textContent = analysis.executiveSummary || '';
+
+            const pitch = analysis.pitchRecommendations || {};
+            document.getElementById('one-liner').textContent = pitch.oneLiner || '';
+            document.getElementById('opening-hook').textContent = pitch.openingHook || '';
+
+            const keyMessages = document.getElementById('key-messages');
+            keyMessages.innerHTML = (pitch.keyMessages || [])
+                .map(msg => `<li>${escapeHtml(msg)}</li>`)
+                .join('');
+
+            const alignmentsContainer = document.getElementById('key-alignments');
+            alignmentsContainer.innerHTML = (analysis.keyAlignments || [])
+                .map(a => `
+                    <div class="alignment-card">
+                        <h5>${escapeHtml(a.area)}</h5>
+                        <p>${escapeHtml(a.explanation)}</p>
+                        ${a.evidence ? `<p class="evidence">"${escapeHtml(a.evidence)}"</p>` : ''}
+                    </div>
+                `).join('');
+
+            // Build portfolio analogies with verification badges
+            const analogiesContainer = document.getElementById('portfolio-analogies');
+            const analogyVerifications = verification?.portfolioAnalogiesVerified || [];
+            analogiesContainer.innerHTML = (pitch.portfolioAnalogies || [])
+                .map((a, idx) => {
+                    const v = analogyVerifications[idx];
+                    const badgeHtml = v ? (v.verified
+                        ? '<span class="verification-badge verified">✓ Verified</span>'
+                        : '<span class="verification-badge unverified">⚠ Unverified</span>')
+                        : '';
+                    return `
+                    <div class="analogy-card">
+                        <h5>${escapeHtml(a.company)}${badgeHtml}</h5>
+                        <p>${escapeHtml(a.analogy)}</p>
+                    </div>
+                    `;
+                }).join('');
+
+            const concernsContainer = document.getElementById('potential-concerns');
+            concernsContainer.innerHTML = (analysis.potentialConcerns || [])
+                .map(c => `
+                    <div class="concern-card">
+                        <h5>${escapeHtml(c.concern)}</h5>
+                        <div class="mitigation">
+                            <p class="mitigation-label">Mitigation</p>
+                            <p>${escapeHtml(c.mitigation)}</p>
+                            ${c.talkingPoint ? `<p style="margin-top:8px;font-style:italic;">"${escapeHtml(c.talkingPoint)}"</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+            const lang = analysis.languageGuidance || {};
+
+            const termsToUse = document.getElementById('terms-to-use');
+            termsToUse.innerHTML = (lang.termsToUse || [])
+                .map(t => `<span class="tag-use">${escapeHtml(t)}</span>`)
+                .join('');
+
+            const termsToAvoid = document.getElementById('terms-to-avoid');
+            termsToAvoid.innerHTML = (lang.termsToAvoid || [])
+                .map(t => `<span class="tag-avoid">${escapeHtml(t)}</span>`)
+                .join('');
+
+            const framingTips = document.getElementById('framing-tips');
+            framingTips.innerHTML = (lang.framingTips || [])
+                .map(tip => `<li>${escapeHtml(tip)}</li>`)
+                .join('');
+
+            const questionsContainer = document.getElementById('anticipated-questions');
+            questionsContainer.innerHTML = (analysis.anticipatedQuestions || [])
+                .map(q => `
+                    <div class="question-card">
+                        <h5>"${escapeHtml(q.question)}"</h5>
+                        <div class="response">
+                            <p class="response-label">Suggested Response</p>
+                            <p>${escapeHtml(q.suggestedResponse)}</p>
+                            ${q.keyPoints && q.keyPoints.length > 0 ? `
+                                <ul style="margin-top:8px;margin-bottom:0;">
+                                    ${q.keyPoints.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+                                </ul>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+            const nextSteps = document.getElementById('next-steps');
+            nextSteps.innerHTML = (analysis.nextSteps || [])
+                .map(step => `<li>${escapeHtml(step)}</li>`)
+                .join('');
+
+            showState(resultsState);
+
+            selectedFile = null;
+            fileInput.value = '';
+            uploadForm.style.display = 'none';
+            companyNameInput.value = '';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function displayVerificationBanner(verification) {
+            const banner = document.getElementById('verification-banner');
+            const icon = document.getElementById('verification-icon');
+            const text = document.getElementById('verification-text');
+            const warningsDiv = document.getElementById('verification-warnings');
+
+            if (!verification) {
+                banner.style.display = 'none';
+                warningsDiv.style.display = 'none';
+                return;
+            }
+
+            banner.style.display = 'flex';
+            banner.className = 'verification-banner';
+
+            const status = verification.verificationStatus || 'PASSED';
+            const investmentWarnings = verification.investmentClaimWarnings || [];
+            const dollarWarnings = verification.dollarClaimWarnings || [];
+            const unverifiedAnalogies = (verification.portfolioAnalogiesVerified || []).filter(v => !v.verified);
+
+            if (status === 'PASSED') {
+                banner.classList.add('passed');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                text.textContent = 'All claims verified against investor portfolio data.';
+                warningsDiv.style.display = 'none';
+            } else if (status === 'WARNING') {
+                banner.classList.add('warning');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />';
+                const count = verification.unverifiedCount + (verification.warningCount || 0);
+                text.textContent = `${count} claim(s) flagged for review. See details below.`;
+            } else {
+                banner.classList.add('flagged');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                text.textContent = `${verification.unverifiedCount} potentially fabricated claim(s) detected. Review carefully.`;
+            }
+
+            // Display detailed warnings
+            const allWarnings = [
+                ...investmentWarnings.map(w => ({ ...w, severity: 'high' })),
+                ...unverifiedAnalogies.map(a => ({
+                    field: 'portfolioAnalogies',
+                    message: `Unverified portfolio analogy: "${a.company}" not found in investor portfolio`,
+                    severity: 'high'
+                })),
+                ...dollarWarnings.map(w => ({ ...w, severity: 'medium' }))
+            ];
+
+            if (allWarnings.length > 0) {
+                warningsDiv.style.display = 'block';
+                warningsDiv.innerHTML = `
+                    <h5>⚠️ Verification Warnings</h5>
+                    ${allWarnings.map(w => `
+                        <div class="verification-warning-item ${w.severity}">
+                            <span class="field">${escapeHtml(w.field)}:</span>
+                            <span class="message">${escapeHtml(w.message)}</span>
+                        </div>
+                    `).join('')}
+                `;
+            } else {
+                warningsDiv.style.display = 'none';
+            }
+        }
+
+        btnRegenerate.addEventListener('click', async () => {
+            if (!currentBriefingId) {
+                showError('No briefing to regenerate. Please upload a new briefing.');
+                return;
+            }
+
+            showState(analyzingState);
+            analyzingText.textContent = 'Regenerating positioning analysis...';
+
+            try {
+                const res = await fetch('/api/analyze-positioning', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        briefingId: currentBriefingId,
+                        investorSlug: INVESTOR_SLUG
+                    })
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || 'Regeneration failed');
+                }
+
+                const data = await res.json();
+
+                const getRes = await fetch(`/api/get-positioning?briefingId=${currentBriefingId}`);
+                const briefingData = await getRes.json();
+
+                displayResults(briefingData.briefing, data.analysis, data.verification);
+
+            } catch (err) {
+                console.error('Error:', err);
+                showError(err.message || 'Failed to regenerate. Please try again.');
+            }
+        });
+
+        btnReplace.addEventListener('click', async () => {
+            if (currentBriefingId) {
+                try {
+                    await fetch(`/api/delete-briefing?briefingId=${currentBriefingId}`, {
+                        method: 'DELETE'
+                    });
+                } catch (err) {
+                    console.log('Could not delete old briefing:', err);
+                }
+            }
+
+            currentBriefingId = null;
+            showState(uploadState);
+        });
+
+        btnTryAgain.addEventListener('click', () => {
+            showState(uploadState);
+        });
+
+        checkExistingBriefing();
+    })();
+    </script>
+</body>
+</html>

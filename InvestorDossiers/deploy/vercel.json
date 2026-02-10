@@ -4,7 +4,8 @@
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/", "destination": "/admin/index.html" },
     { "source": "/portal", "destination": "/portal.html" },
-    { "source": "/yoko-li", "destination": "/yoko-li.html" }
+    { "source": "/yoko-li", "destination": "/yoko-li.html" },
+    { "source": "/raghu-raghuram", "destination": "/raghu-raghuram.html" }
   ],
   "functions": {
     "api/**/*.js": {
