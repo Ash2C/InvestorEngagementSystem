@@ -48,7 +48,7 @@
         }
 
         .btn-download {
-            display: inline-flex;
+            display: none !important; /* PDF download disabled temporarily */
             align-items: center;
             gap: 8px;
             padding: 10px 20px;
@@ -318,6 +318,8 @@
 
         @media print {
             body { background: white; }
+            .toolbar { display: none !important; }
+            #ai-generated-profile { display: none !important; }
             .container { padding: 0; }
             .dossier { box-shadow: none; padding: 24px; }
             a { color: var(--primary); text-decoration: underline; }
@@ -1628,32 +1630,37 @@
         });
 
         function downloadPDF() {
-            const element = document.getElementById('dossier-content');
-            const btn = document.querySelector('.btn-download');
-            const originalText = btn.innerHTML;
+            var element = document.getElementById('dossier-content');
+            var btn = document.querySelector('.btn-download');
+            var originalText = btn.innerHTML;
 
-            btn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="animation: spin 1s linear infinite;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Generating...';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="animation: spin 1s linear infinite;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Generating...';
             btn.disabled = true;
 
-            const uploadState = document.getElementById('positioning-upload');
-            const analyzingState = document.getElementById('positioning-analyzing');
-            const errorState = document.getElementById('positioning-error');
-            const resultsState = document.getElementById('positioning-results');
-            const resultsActions = document.querySelector('.results-actions');
+            // Save and zero out body margin so html2canvas has no offset
+            var savedBodyMargin = document.body.style.margin;
+            document.body.style.margin = '0';
 
-            const uploadDisplay = uploadState.style.display;
-            const analyzingDisplay = analyzingState.style.display;
-            const errorDisplay = errorState.style.display;
+            // Clone into a fixed-position container at viewport origin
+            var wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position:fixed;top:0;left:0;width:700px;padding:0;margin:0;background:white;z-index:-9999;opacity:0;pointer-events:none;';
+            var clone = element.cloneNode(true);
+            clone.style.cssText = 'width:700px;max-width:700px;margin:0;padding:40px;box-sizing:border-box;box-shadow:none;border-radius:0;overflow:visible;background:white;';
+            clone.classList.add('pdf-rendering');
 
-            uploadState.style.display = 'none';
-            analyzingState.style.display = 'none';
-            errorState.style.display = 'none';
-            if (resultsActions) resultsActions.style.display = 'none';
+            // Hide positioning upload/analyzing/error states in clone
+            ['positioning-upload','positioning-analyzing','positioning-error'].forEach(function(id) {
+                var el = clone.querySelector('#' + id);
+                if (el) el.style.display = 'none';
+            });
+            var ra = clone.querySelector('.results-actions');
+            if (ra) ra.style.display = 'none';
 
-            element.classList.add('pdf-rendering');
+            wrapper.appendChild(clone);
+            document.body.appendChild(wrapper);
 
-            const opt = {
-                margin: [10, 15, 10, 15],
+            var opt = {
+                margin: [10, 10, 10, 10],
                 filename: 'Saurabh-Gupta-Investor-Dossier.pdf',
                 image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: {
@@ -1662,16 +1669,10 @@
                     logging: false,
                     letterRendering: true,
                     scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: element.scrollWidth,
-                    windowHeight: element.scrollHeight,
-                    onclone: function(clonedDoc) {
-                        const clonedElement = clonedDoc.getElementById('dossier-content');
-                        if (clonedElement) {
-                            clonedElement.style.height = 'auto';
-                            clonedElement.style.overflow = 'visible';
-                        }
-                    }
+                    scrollY: -window.scrollY,
+                    windowWidth: 700,
+                    x: 0,
+                    y: 0
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: {
@@ -1682,29 +1683,22 @@
                 }
             };
 
-            html2pdf().set(opt).from(element).save().then(() => {
+            html2pdf().set(opt).from(clone).save().then(function() {
+                document.body.removeChild(wrapper);
+                document.body.style.margin = savedBodyMargin;
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                element.classList.remove('pdf-rendering');
-                uploadState.style.display = uploadDisplay;
-                analyzingState.style.display = analyzingDisplay;
-                errorState.style.display = errorDisplay;
-                if (resultsActions) resultsActions.style.display = '';
-            }).catch(() => {
+            }).catch(function() {
+                document.body.removeChild(wrapper);
+                document.body.style.margin = savedBodyMargin;
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                element.classList.remove('pdf-rendering');
-                uploadState.style.display = uploadDisplay;
-                analyzingState.style.display = analyzingDisplay;
-                errorState.style.display = errorDisplay;
-                if (resultsActions) resultsActions.style.display = '';
                 window.print();
             });
         }
     </script>
     <style>
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media print { .toolbar { display: none !important; } }
     </style>
 
     <script>

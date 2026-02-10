@@ -271,6 +271,116 @@ engagement:
     - question: "What's the path to $1B+ in revenue?"
     - question: "Why raise from DST specifically?"
     - question: "How do you think about the AI opportunity?"
+---`,
+
+  'raghu-raghuram': `---
+name: "Raghu Raghuram"
+firm: "Andreessen Horowitz (a16z)"
+role: "Managing Partner & General Partner"
+team: "AI Infrastructure & Growth"
+
+investment_focus:
+  areas:
+    - "AI Infrastructure"
+    - "Enterprise Software"
+    - "Cloud & Virtualization"
+    - "Growth-Stage Companies"
+  stages:
+    - "Seed"
+    - "Series A"
+    - "Series B"
+    - "Growth"
+  check_size:
+    min: "$10M"
+    max: "$500M+ (a16z fund)"
+
+background:
+  previous_roles:
+    - company: "VMware"
+      role: "CEO"
+      description: "Led VMware as CEO through $13.5B revenue, 300K+ customers, shepherded $69B Broadcom acquisition — largest software exit in history"
+    - company: "VMware"
+      role: "COO & EVP Products"
+      description: "Built VMware's product portfolio from vSphere to NSX to vSAN, drove enterprise cloud strategy"
+    - company: "Netscape"
+      role: "Engineer"
+      description: "Early career at Netscape building internet infrastructure"
+  education:
+    - institution: "IIT Bombay"
+      field: "B.Tech in Computer Science & Engineering"
+    - institution: "Wharton School, UPenn"
+      field: "MBA"
+  notable_traits:
+    - "20+ year operator as CEO/COO of $13.5B revenue company"
+    - "Deep infrastructure expertise spanning virtualization, cloud, networking"
+    - "Navigated VMware through major transitions: on-prem to cloud, cloud to AI"
+    - "Managed $69B acquisition by Broadcom — largest software deal ever"
+
+portfolio:
+  notable_investments:
+    - name: "Fauna Robotics"
+      description: "AI-powered wildlife monitoring and conservation technology"
+    - name: "Ema"
+      description: "Universal AI employee platform for enterprise automation"
+    - name: "Nile"
+      description: "Network-as-a-Service for enterprise campus networking"
+    - name: "Unconventional AI"
+      description: "$475M AI venture to build transformative AI applications"
+    - name: "StackGen"
+      description: "AI-powered infrastructure-from-code platform"
+  a16z_infrastructure_portfolio:
+    - name: "Databricks"
+      description: "Unified analytics and AI platform"
+    - name: "dbt Labs"
+      description: "Data transformation tools"
+
+thesis:
+  core_philosophy: "The best AI infrastructure companies are built by operators who understand enterprise complexity — not just the technology, but the organizational, security, and compliance challenges of deploying AI at scale"
+  key_concepts:
+    - name: "Enterprise AI Infrastructure"
+      description: "AI needs new infrastructure from silicon to applications. Companies that build the foundational layers for enterprise AI deployment will capture enormous value."
+    - name: "Operator-Investor Advantage"
+      description: "Having run a $13.5B enterprise software company provides unique insight into what enterprises actually need, not what technologists think they need."
+    - name: "Platform Transitions Create Winners"
+      description: "Every major platform shift (mainframe→PC, PC→cloud, cloud→AI) creates a new generation of dominant companies. We're in the early innings of the AI platform shift."
+    - name: "Full-Stack AI"
+      description: "Winning companies own the full stack: custom silicon, optimized networking, purpose-built storage, and application-layer intelligence."
+    - name: "AI-Native Enterprise Software"
+      description: "Enterprise software is being completely reimagined with AI at the core, not bolted on. This creates opportunities across every vertical."
+  patterns:
+    - "Enterprise-grade AI infrastructure"
+    - "Full-stack vertical integration"
+    - "Platform-level technology shifts"
+    - "Operator-founders with deep domain expertise"
+    - "Companies solving real enterprise deployment challenges"
+    - "AI + robotics convergence opportunities"
+  anti_patterns:
+    - "AI wrappers without deep technology moats"
+    - "Consumer-only AI applications without enterprise path"
+    - "Companies ignoring security, compliance, and governance"
+    - "Pure research without clear path to production deployment"
+    - "Incremental improvements to existing workflows"
+
+engagement:
+  do:
+    - "Lead with enterprise pain points you've lived through"
+    - "Show deep technical architecture for AI workloads"
+    - "Demonstrate understanding of enterprise buying cycles"
+    - "Reference platform transitions and where your company fits"
+    - "Discuss security, compliance, and governance from day one"
+    - "Show how your product works at VMware/Broadcom scale"
+  dont:
+    - "Pitch consumer-only AI applications"
+    - "Ignore enterprise requirements (security, compliance, multi-tenancy)"
+    - "Focus only on model capabilities without infrastructure story"
+    - "Dismiss incumbents without showing clear technical advantage"
+    - "Present vague AI roadmaps without concrete milestones"
+  questions_they_ask:
+    - question: "How does this deploy in a regulated enterprise environment?"
+    - question: "What's the infrastructure requirement at scale?"
+    - question: "How do you handle data privacy and model governance?"
+    - question: "What's defensible when hyperscalers build this?"
+    - question: "How does the AI/robotics convergence affect your roadmap?"
 ---`
 };
 
